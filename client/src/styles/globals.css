@@ -20,8 +20,15 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body, #root {
+html {
   width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+body {
+  width: 100vw;
   height: 100%;
   height: 100dvh;
   background: var(--void);
@@ -30,12 +37,21 @@ html, body, #root {
   -webkit-font-smoothing: none;
   font-smooth: never;
   overscroll-behavior: none;
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 /* ── Layout ─────────────────────────────────────────────────────────────── */
 .game-layout {
   display: flex;
   flex-direction: column;
+  width: 100vw;
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
@@ -1513,7 +1529,9 @@ html, body, #root {
 
 /* ── Lobby ──────────────────────────────────────────────────────────────── */
 .lobby-root {
+  width: 100vw;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
