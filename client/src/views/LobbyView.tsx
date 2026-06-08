@@ -7,7 +7,6 @@ import { TourOverlay } from '../components/TourOverlay';
 export function LobbyView() {
   const {
     lobbyState,
-    connectionMode,
     createOnlineRoom,
     joinOnlineRoom,
     setFaction,
@@ -16,8 +15,36 @@ export function LobbyView() {
 
   const [joinCode, setJoinCode] = useState('');
   const [playerName, setPlayerName] = useState('COMMANDER');
-  const [screen, setScreen] = useState<'home' | 'create' | 'join' | 'lobby'>('home');
+  const [screen, setScreen] = useState<'home' | 'join' | 'lobby'>('home');
   const [tourOpen, setTourOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleHost() {
+    setLoading(true);
+    setError(null);
+    try {
+      await createOnlineRoom(playerName);
+      setScreen('lobby');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not connect to server.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleJoin() {
+    setLoading(true);
+    setError(null);
+    try {
+      await joinOnlineRoom(joinCode, playerName);
+      setScreen('lobby');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Room not found or server unreachable.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // ── Home screen ────────────────────────────────────────────────────────────
   if (screen === 'home') {
@@ -38,20 +65,28 @@ export function LobbyView() {
               />
             </div>
 
+            {error && <div className="lobby-error">{error}</div>}
+
             <div className="lobby-btn-group">
               <button
                 className="btn primary large"
-                onClick={async () => {
-                  await createOnlineRoom(playerName);
-                  setScreen('lobby');
-                }}
+                disabled={loading || !playerName.trim()}
+                onClick={handleHost}
               >
-                ▶ HOST GAME
+                {loading ? '…CONNECTING' : '▶ HOST GAME'}
               </button>
-              <button className="btn secondary large" onClick={() => setScreen('join')}>
+              <button
+                className="btn secondary large"
+                disabled={loading}
+                onClick={() => { setError(null); setScreen('join'); }}
+              >
                 → JOIN GAME
               </button>
-              <button className="btn secondary large" style={{ opacity: 0.7, fontSize: 13 }} onClick={() => setTourOpen(true)}>
+              <button
+                className="btn secondary large"
+                style={{ opacity: 0.7, fontSize: 13 }}
+                onClick={() => setTourOpen(true)}
+              >
                 ? QUICK GUIDE
               </button>
             </div>
@@ -77,17 +112,19 @@ export function LobbyView() {
               onChange={(e) => setJoinCode(e.target.value.trim())}
             />
           </div>
+
+          {error && <div className="lobby-error">{error}</div>}
+
           <button
             className="btn primary large"
-            disabled={!joinCode}
-            onClick={async () => {
-              await joinOnlineRoom(joinCode, playerName);
-              setScreen('lobby');
-            }}
+            disabled={!joinCode || loading}
+            onClick={handleJoin}
           >
-            JOIN
+            {loading ? '…CONNECTING' : 'JOIN'}
           </button>
-          <button className="btn ghost" onClick={() => setScreen('home')}>← BACK</button>
+          <button className="btn ghost" disabled={loading} onClick={() => { setError(null); setScreen('home'); }}>
+            ← BACK
+          </button>
         </div>
       </div>
     );

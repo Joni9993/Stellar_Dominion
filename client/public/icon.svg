@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#0c1018"/>
+  <!-- Outer diamond -->
+  <polygon points="256,40 472,256 256,472 40,256" fill="#1c2533" stroke="#5fa8a4" stroke-width="14"/>
+  <!-- Inner ring -->
+  <circle cx="256" cy="256" r="76" fill="#243042" stroke="#5fa8a4" stroke-width="11"/>
+  <!-- Amber inner diamond -->
+  <polygon points="256,206 298,256 256,306 214,256" fill="#d9a441"/>
+  <!-- Star field dots -->
+  <circle cx="148" cy="148" r="5" fill="#e9e3d4" opacity="0.75"/>
+  <circle cx="364" cy="136" r="4" fill="#e9e3d4" opacity="0.75"/>
+  <circle cx="390" cy="344" r="5" fill="#e9e3d4" opacity="0.75"/>
+  <circle cx="128" cy="368" r="4" fill="#e9e3d4" opacity="0.75"/>
+  <circle cx="200" cy="96" r="3" fill="#e9e3d4" opacity="0.5"/>
+  <circle cx="400" cy="200" r="3" fill="#e9e3d4" opacity="0.5"/>
+</svg>

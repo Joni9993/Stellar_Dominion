@@ -22,11 +22,13 @@
 
 html, body, #root {
   height: 100%;
+  height: 100dvh;
   background: var(--void);
   color: var(--bone);
   font-family: 'VT323', monospace;
   -webkit-font-smoothing: none;
   font-smooth: never;
+  overscroll-behavior: none;
 }
 
 /* ── Layout ─────────────────────────────────────────────────────────────── */
@@ -34,6 +36,7 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background:
     radial-gradient(120% 90% at 50% 0%, #131a26 0%, var(--void) 55%, #070a10 100%);
@@ -1927,3 +1930,127 @@ html, body, #root {
 }
 
 .tour-nav-dot:hover:not(.active) { background: var(--dim); }
+
+/* ── Lobby error ─────────────────────────────────────────────────────────── */
+.lobby-error {
+  font-size: 13px;
+  color: var(--red);
+  background: rgba(232, 81, 46, 0.1);
+  border: 1px solid var(--red);
+  padding: 8px 10px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ── Mobile (≤640px) — all screens fit viewport, no scroll ──────────────── */
+@media (max-width: 640px) {
+  /* Viewport height fix */
+  .game-layout { height: 100dvh; }
+
+  /* ── Lobby ──────────────────────────────────────────────────────────────── */
+  .lobby-root {
+    min-height: 100dvh;
+    padding: 12px;
+    align-items: flex-start;
+    padding-top: max(24px, env(safe-area-inset-top));
+  }
+  .lobby-card,
+  .lobby-card.wide {
+    width: 100%;
+    padding: 22px 18px;
+    gap: 14px;
+  }
+  .lobby-title { font-size: 20px; }
+  .lobby-faction-grid { grid-template-columns: repeat(2, 1fr); }
+  .lobby-faction-sub { display: none; }
+
+  /* ── HUD compact ─────────────────────────────────────────────────────────── */
+  .hud {
+    height: 36px;
+    flex: 0 0 36px;
+    gap: 8px;
+    padding: 0 8px;
+  }
+  .hud-location { font-size: 12px; }
+  .hud-resources { gap: 8px; }
+  .hud-res { font-size: 14px; gap: 3px; }
+  .res-dot { width: 7px; height: 7px; }
+
+  /* ── Game body: stack vertically ─────────────────────────────────────────── */
+  .game-body { flex-direction: column; }
+
+  /* Canvas area gets most of the space */
+  .canvas-area { min-height: 0; }
+
+  /* ActBar: taller touch targets */
+  .act-bar { height: 44px; flex: 0 0 44px; }
+  .act-bar button { font-size: 7px; }
+
+  /* ── Side panel: full-width bottom strip ─────────────────────────────────── */
+  .side-panel {
+    width: 100%;
+    flex: 0 0 176px;
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+  .panel-body {
+    padding: 6px 8px;
+    overflow-y: auto;
+    /* leave room for actions bar inside panel */
+    max-height: 96px;
+  }
+  .panel-title { padding: 6px 8px; }
+  .panel-actions { padding: 5px 8px; gap: 4px; }
+  .kv { font-size: 13px; padding: 2px 0; }
+  .sect { margin: 6px 0 3px; }
+
+  /* ── Shipyard: scale down hull to fit ─────────────────────────────────────── */
+  .yard-center { padding-top: 4px; overflow: hidden; }
+  .hull-wrap { zoom: 0.72; }
+  .zone-labels { left: 155px; }
+  .yard-hint { font-size: 11px; }
+  .yard-palette { width: 110px; flex: 0 0 110px; }
+
+  /* ── Modals: full-screen on mobile ────────────────────────────────────────── */
+  .station-backdrop { align-items: flex-end; padding: 0; }
+  .station-modal {
+    width: 100%;
+    max-height: 90dvh;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 0;
+  }
+  .station-tab { font-size: 6px; padding: 7px 4px; }
+
+  .rules-modal {
+    width: 100%;
+    max-height: 95dvh;
+    border-left: none;
+    border-right: none;
+  }
+  .rules-backdrop { align-items: flex-end; padding: 0; }
+
+  .commander-modal {
+    width: 100%;
+    max-height: 90dvh;
+  }
+  .commander-ship-col { width: 110px; flex: 0 0 110px; padding: 12px 8px; }
+
+  .target-modal { width: min(320px, 94vw); }
+
+  /* ── Combat: compress ships ──────────────────────────────────────────────── */
+  .combat-bars { width: 120px; }
+  .combat-ship { padding: 4px 4px; }
+  .combat-hull-outer { width: 160px; height: 120px; }
+  .combat-hull-outer > .hull-wrap { zoom: 0.44; }
+
+  /* ── Win overlay ─────────────────────────────────────────────────────────── */
+  .win-content { max-width: 92vw; }
+  .win-faction { font-size: 16px; }
+  .win-stats { width: 100%; }
+  .battle-report { width: 100%; }
+
+  /* ── Tour overlay ────────────────────────────────────────────────────────── */
+  .tour-card { max-height: calc(100dvh - 24px); }
+}

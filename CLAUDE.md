@@ -71,9 +71,9 @@ UI reference mockup: [stellar-dominion-mockup-v3.html](stellar-dominion-mockup-v
 | 4 | Artifact + Rumor system: spawn, claim, contest, PvP loot, win check | ✅ Done |
 | 5 | Multiplayer: Colyseus rooms, lobby, server-authoritative, reconnection | ✅ Done |
 | 6 | Factions (6 kits + silhouettes), crew, balancing pass | ✅ Done |
-| 7 | PWA + deploy, polish | Not started |
+| 7 | PWA + deploy, polish | ✅ Done |
 
-**What's in the codebase (as of M6 + balance pass):**
+**What's in the codebase (as of M7):**
 - `pnpm-workspace.yaml` — monorepo with `/shared`, `/client`, `/server`
 - `/shared/src/` — types, rng (mulberry32), galaxy (18-system template + seeded generator), factions (6 with faction-specific starter builds: artifact + 1 weapon + 1 utility), artifacts (12), parts (11), crew (5), shipStats (deriveStats + adjacency), gameLogic (jump, trade, refuel, crew, endTurn + cycle stock replenishment, claimArtifact, rumorSpawn — all pure functions)
 - `/shared/src/combatEngine.ts` — deterministic tick simulation, all 12 artifact effects, RPS counter modifiers (×1.5/×0.6), energy system, point-defense, boarding hook, etc.
