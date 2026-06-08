@@ -15,7 +15,7 @@ export default defineConfig({
         description: 'Turn-based multiplayer space strategy — 2–6 players',
         theme_color: '#0c1018',
         background_color: '#0c1018',
-        display: 'standalone',
+        display: 'fullscreen',
         orientation: 'any',
         start_url: '/',
         icons: [
