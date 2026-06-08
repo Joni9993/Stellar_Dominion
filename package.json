@@ -1,0 +1,11 @@
+{
+  "name": "stellar-dominion",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "build": "pnpm -r run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

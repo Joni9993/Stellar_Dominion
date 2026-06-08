@@ -1,0 +1,16 @@
+{
+  "name": "@stellar-dominion/simulation",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "simulate": "tsx simulate.ts",
+    "combat": "tsx combat-sim.ts"
+  },
+  "dependencies": {
+    "@stellar-dominion/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.22.4"
+  }
+}
