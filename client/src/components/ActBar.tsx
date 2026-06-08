@@ -28,7 +28,14 @@ export function ActBar() {
     return (
       <div className="act-bar">
         <button onClick={() => setView('map')}>◄ MAP</button>
-        <button className="end-turn">✓ SAVE BUILD</button>
+        <button
+          className={sys?.hasStation && sys?.id === me?.systemId ? 'station-pulse' : ''}
+          disabled={!sys?.hasStation || sys?.id !== me?.systemId}
+          onClick={openStation}
+          title={!sys?.hasStation ? 'No station here' : sys?.id !== me?.systemId ? 'Not your location' : ''}
+        >
+          ⇄ STATION
+        </button>
       </div>
     );
   }

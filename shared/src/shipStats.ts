@@ -56,7 +56,8 @@ export function deriveStats(build: ShipBuild, parts: Record<string, Part>, facti
     const p = parts[id];
 
     if (!p) {
-      // Check for known artifacts that contribute virtual stats
+      // Not a Part → must be an Artifact
+      artifactCount++;
       if (id === 'gilded-aegis') hasGildedAegis = true;
       continue;
     }

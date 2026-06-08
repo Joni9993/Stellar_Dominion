@@ -2,6 +2,7 @@ import React from 'react';
 import { HUD } from './HUD';
 import { ActBar } from './ActBar';
 import { MapPanel } from './MapPanel';
+import { ShipyardPanel } from './ShipyardPanel';
 import { StationModal } from './StationModal';
 import { WinOverlay } from './WinOverlay';
 import { MapView } from '../views/MapView';
@@ -34,6 +35,7 @@ export function GameLayout() {
               <ActBar />
             </div>
             {activeView === 'map' && <MapPanel />}
+            {activeView === 'yard' && <ShipyardPanel />}
           </div>
         </div>
       </div>

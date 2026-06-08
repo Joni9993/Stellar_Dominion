@@ -48,6 +48,11 @@ import {
 
 export type StationTab = 'market' | 'fuel' | 'crew' | 'modules';
 
+export type YardZoneLabel = 'BOW' | 'CORE' | 'STERN';
+export type YardInspection =
+  | { kind: 'part'; id: string; fromGridSlot: number }
+  | { kind: 'zone'; zone: YardZoneLabel };
+
 export interface LobbyPlayer {
   id: string;
   name: string;
@@ -94,6 +99,7 @@ type GameStore = {
 
   // Shipyard selection
   selectedPalettePartId: string | null;
+  yardInspection: YardInspection | null;
 
   // ── Actions ──
 
@@ -134,6 +140,7 @@ type GameStore = {
   selectPalettePart: (partId: string | null) => void;
   placePartInSlot: (slotIndex: number, fromSlot?: number) => void;
   removePartFromSlot: (slotIndex: number) => void;
+  setYardInspection: (i: YardInspection | null) => void;
 
   // Module shop
   buyModule: (partId: string) => void;
@@ -161,6 +168,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   isStationOpen: false,
   stationTab: 'market',
   selectedPalettePartId: null,
+  yardInspection: null,
 
   // ── Lobby / connection ────────────────────────────────────────────────────
 
@@ -343,7 +351,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // ── Navigation ────────────────────────────────────────────────────────────
 
   selectSystem: (id) => set({ selectedSystemId: id }),
-  setView: (view) => set({ activeView: view }),
+  setView: (view) => set({ activeView: view, yardInspection: null }),
 
   // ── Jump ─────────────────────────────────────────────────────────────────
 
@@ -437,6 +445,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // ── Shipyard ──────────────────────────────────────────────────────────────
 
   selectPalettePart: (partId) => set({ selectedPalettePartId: partId }),
+  setYardInspection: (i) => set({ yardInspection: i }),
 
   placePartInSlot: (slotIndex, fromSlot?) => {
     const { matchState, myPlayerId, selectedPalettePartId, connectionMode, colyseusRoom } = get();
