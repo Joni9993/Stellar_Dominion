@@ -43,6 +43,7 @@ interface LobbyPlayer {
   name: string;
   factionId: FactionId | null;
   isHost: boolean;
+  isObserver: boolean;
 }
 
 interface TurnFlags {
@@ -69,7 +70,7 @@ export class GameRoom extends Room {
   private turnFlags = new Map<string, TurnFlags>(); // playerId → flags
 
   onCreate(_options: unknown) {
-    this.maxClients = 6;
+    this.maxClients = 10; // 6 players + up to 4 observers
 
     this.onMessage('*', (client: Client, type: string | number, message: unknown) => {
       try {
@@ -99,6 +100,8 @@ export class GameRoom extends Room {
         client.send('GAME_STARTED', {
           state: this.matchState,
           myPlayerId: reconnectId,
+          isObserver: false,
+          hasObserver: this.getHasObserver(),
           ...this.getTurnFlagsForPlayer(reconnectId),
         });
         console.log(`[GameRoom] ${existingPlayer.name} reconnected (${reconnectId})`);
@@ -122,13 +125,17 @@ export class GameRoom extends Room {
       name: playerName,
       factionId: null,
       isHost: isFirstPlayer,
+      isObserver: false,
     });
 
     if (this.gamePhase === 'playing' && this.matchState) {
       // New player joining an already-started game — send state so they can observe
+      const isObs = !this.matchState.players.some((p) => p.id === playerId);
       client.send('GAME_STARTED', {
         state: this.matchState,
         myPlayerId: playerId,
+        isObserver: isObs,
+        hasObserver: this.getHasObserver(),
         ...this.getTurnFlagsForPlayer(playerId),
       });
     } else {
@@ -148,6 +155,8 @@ export class GameRoom extends Room {
           client.send('GAME_STARTED', {
             state: this.matchState,
             myPlayerId: playerId,
+            isObserver: !this.matchState.players.some((p) => p.id === playerId),
+            hasObserver: this.getHasObserver(),
             ...this.getTurnFlagsForPlayer(playerId),
           });
         }
@@ -206,17 +215,30 @@ export class GameRoom extends Room {
       }
 
       const lobby = this.lobbyPlayers.get(client.sessionId);
-      if (lobby) lobby.factionId = factionId;
+      if (lobby) {
+        lobby.factionId = factionId;
+        lobby.isObserver = false;
+      }
+      this.broadcastLobby();
+    }
+
+    if (type === 'SET_OBSERVER') {
+      const lobby = this.lobbyPlayers.get(client.sessionId);
+      if (lobby) {
+        lobby.isObserver = true;
+        lobby.factionId = null;
+      }
       this.broadcastLobby();
     }
 
     if (type === 'START_GAME' && client.sessionId === this.hostSessionId) {
-      const players = [...this.lobbyPlayers.values()];
-      if (players.length < 2) {
+      const allPlayers = [...this.lobbyPlayers.values()];
+      const gamePlayers = allPlayers.filter((p) => !p.isObserver);
+      if (gamePlayers.length < 2) {
         client.send('ERROR', { message: 'Need at least 2 players to start' });
         return;
       }
-      if (players.some((p) => p.factionId === null)) {
+      if (gamePlayers.some((p) => p.factionId === null)) {
         client.send('ERROR', { message: 'All players must pick a faction' });
         return;
       }
@@ -226,7 +248,11 @@ export class GameRoom extends Room {
 
   private startGame() {
     this.gameSeed = Date.now();
-    const setups = [...this.lobbyPlayers.values()].map((p) => ({
+    const allLobby = [...this.lobbyPlayers.values()];
+    const gamePlayers = allLobby.filter((p) => !p.isObserver);
+    const observerIds = new Set(allLobby.filter((p) => p.isObserver).map((p) => p.id));
+
+    const setups = gamePlayers.map((p) => ({
       id: p.id,
       name: p.name,
       factionId: p.factionId!,
@@ -238,6 +264,8 @@ export class GameRoom extends Room {
     // Reset turn flags for first active player
     this.resetTurnFlags(this.matchState.activePlayerId);
 
+    const hasObserver = observerIds.size > 0;
+
     // Send each client their personalised GAME_STARTED
     this.clients.forEach((c) => {
       const playerId = this.sessionToPlayer.get(c.sessionId);
@@ -245,15 +273,21 @@ export class GameRoom extends Room {
       c.send('GAME_STARTED', {
         state: this.matchState,
         myPlayerId: playerId,
+        isObserver: observerIds.has(playerId),
+        hasObserver,
         jumpsUsed: 0,
         hasActed: false,
       });
     });
 
-    console.log(`[GameRoom] Game started with ${setups.length} players, seed=${this.gameSeed}`);
+    console.log(`[GameRoom] Game started with ${setups.length} players, ${observerIds.size} observers, seed=${this.gameSeed}`);
   }
 
   // ── In-game handlers ────────────────────────────────────────────────────────
+
+  private getHasObserver(): boolean {
+    return [...this.lobbyPlayers.values()].some((p) => p.isObserver);
+  }
 
   private handleGameMessage(
     client: Client,
@@ -261,6 +295,10 @@ export class GameRoom extends Room {
     type: string,
     msg: Record<string, unknown>,
   ) {
+    // Observers and late joiners who aren't in matchState cannot send game actions
+    const isPlayerInGame = this.matchState?.players.some((p) => p.id === playerId) ?? false;
+    if (!isPlayerInGame) return;
+
     const state = this.matchState!;
     const flags = this.turnFlags.get(playerId) ?? { jumpsUsed: 0, hasActed: false };
 
@@ -329,6 +367,7 @@ export class GameRoom extends Room {
           state: this.matchState,
           jumpsUsed: flags.jumpsUsed,
           hasActed: flags.hasActed,
+          hasObserver: this.getHasObserver(),
         });
         break;
       }
@@ -463,6 +502,7 @@ export class GameRoom extends Room {
       state: this.matchState,
       jumpsUsed: flags.jumpsUsed,
       hasActed: flags.hasActed,
+      hasObserver: this.getHasObserver(),
     });
 
     // Check if game is over

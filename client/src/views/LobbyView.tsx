@@ -10,6 +10,7 @@ export function LobbyView() {
     createOnlineRoom,
     joinOnlineRoom,
     setFaction,
+    setObserver,
     startOnlineGame,
   } = useGameStore();
 
@@ -135,7 +136,10 @@ export function LobbyView() {
     const myPlayerId = useGameStore.getState().myPlayerId;
     const me = lobbyState.players.find((p) => p.id === myPlayerId);
     const isHost = lobbyState.isHost;
-    const allPickedFaction = lobbyState.players.every((p) => p.factionId !== null);
+    const gamePlayers = lobbyState.players.filter((p) => !p.isObserver);
+    const observers = lobbyState.players.filter((p) => p.isObserver);
+    const allPickedFaction = gamePlayers.every((p) => p.factionId !== null);
+    const iAmObserver = me?.isObserver === true;
 
     return (
       <div className="lobby-root">
@@ -153,7 +157,7 @@ export function LobbyView() {
 
           {/* Player list */}
           <div className="lobby-players">
-            {lobbyState.players.map((p) => (
+            {gamePlayers.map((p) => (
               <div key={p.id} className={`lobby-player-row ${p.id === myPlayerId ? 'me' : ''}`}>
                 <span className="lobby-player-name">{p.name}{p.isHost ? ' ★' : ''}</span>
                 {p.factionId ? (
@@ -165,10 +169,16 @@ export function LobbyView() {
                 )}
               </div>
             ))}
+            {observers.map((p) => (
+              <div key={p.id} className={`lobby-player-row observer-row ${p.id === myPlayerId ? 'me' : ''}`}>
+                <span className="lobby-player-name">{p.name}</span>
+                <span className="lobby-faction-badge" style={{ color: 'var(--dim)' }}>◉ OBSERVER</span>
+              </div>
+            ))}
           </div>
 
-          {/* Faction picker for me */}
-          {me && (
+          {/* Faction picker or observer status for me */}
+          {me && !iAmObserver && (
             <div className="lobby-faction-picker">
               <div className="lobby-label">CHOOSE YOUR FACTION</div>
               <div className="lobby-faction-grid">
@@ -189,6 +199,24 @@ export function LobbyView() {
                   );
                 })}
               </div>
+              <button
+                className="btn ghost"
+                style={{ marginTop: 10, fontSize: 11, opacity: 0.7 }}
+                onClick={setObserver}
+              >
+                ◉ JOIN AS OBSERVER
+              </button>
+            </div>
+          )}
+
+          {me && iAmObserver && (
+            <div className="lobby-faction-picker">
+              <div style={{ fontFamily: "'Press Start 2P'", fontSize: 8, color: 'var(--dim)', textAlign: 'center', padding: '16px 0' }}>
+                ◉ OBSERVING — NO FACTION<br />
+                <span style={{ fontSize: 7, color: 'var(--faint)', marginTop: 8, display: 'block' }}>
+                  you will see the map and all battles
+                </span>
+              </div>
             </div>
           )}
 
@@ -196,10 +224,10 @@ export function LobbyView() {
           {isHost && (
             <button
               className="btn primary large"
-              disabled={!allPickedFaction || lobbyState.players.length < 2}
+              disabled={!allPickedFaction || gamePlayers.length < 2}
               onClick={startOnlineGame}
             >
-              {lobbyState.players.length < 2
+              {gamePlayers.length < 2
                 ? 'WAITING FOR PLAYERS…'
                 : !allPickedFaction
                 ? 'ALL PLAYERS MUST PICK FACTION'
@@ -207,7 +235,7 @@ export function LobbyView() {
             </button>
           )}
           {!isHost && (
-            <div className="lobby-hint">Waiting for host to start…</div>
+            <div className="lobby-hint">{iAmObserver ? 'Waiting for host to start the game…' : 'Waiting for host to start…'}</div>
           )}
         </div>
       </div>

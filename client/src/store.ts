@@ -58,6 +58,7 @@ export interface LobbyPlayer {
   name: string;
   factionId: FactionId | null;
   isHost: boolean;
+  isObserver: boolean;
 }
 
 export interface LobbyState {
@@ -113,10 +114,15 @@ type GameStore = {
 
   // ── Actions ──
 
+  // Observer
+  isObserver: boolean;
+  hasObserver: boolean;
+
   // Lobby / connection
   createOnlineRoom: (playerName: string) => Promise<void>;
   joinOnlineRoom: (roomId: string, playerName: string) => Promise<void>;
   setFaction: (factionId: FactionId) => void;
+  setObserver: () => void;
   startOnlineGame: () => void;
 
   // Game init (local)
@@ -163,6 +169,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   connectionMode: 'local',
   colyseusRoom: null,
   lobbyState: null,
+  isObserver: false,
+  hasObserver: false,
 
   matchState: null,
   selectedSystemId: null,
@@ -202,6 +210,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setFaction: (factionId) => {
     const { colyseusRoom } = get();
     colyseusRoom?.send('SET_FACTION', { factionId });
+  },
+
+  setObserver: () => {
+    const { colyseusRoom } = get();
+    colyseusRoom?.send('SET_OBSERVER', {});
   },
 
   startOnlineGame: () => {
@@ -526,11 +539,14 @@ function attachRoomListeners(
     });
   });
 
-  room.onMessage('GAME_STARTED', (msg: { state: MatchState; myPlayerId: string; jumpsUsed: number; hasActed: boolean }) => {
+  room.onMessage('GAME_STARTED', (msg: { state: MatchState; myPlayerId: string; isObserver?: boolean; hasObserver?: boolean; jumpsUsed: number; hasActed: boolean }) => {
+    const isObs = msg.isObserver === true || !msg.state.players.find((p) => p.id === msg.myPlayerId);
     const player = msg.state.players.find((p) => p.id === msg.myPlayerId);
     set({
       matchState: msg.state,
       myPlayerId: msg.myPlayerId,
+      isObserver: isObs,
+      hasObserver: msg.hasObserver ?? false,
       jumpsUsed: msg.jumpsUsed,
       hasActed: msg.hasActed,
       lobbyState: null,
@@ -541,12 +557,13 @@ function attachRoomListeners(
     });
   });
 
-  room.onMessage('STATE_UPDATE', (msg: { state: MatchState; jumpsUsed: number; hasActed: boolean }) => {
+  room.onMessage('STATE_UPDATE', (msg: { state: MatchState; jumpsUsed: number; hasActed: boolean; hasObserver?: boolean }) => {
     const myPlayerId = get().myPlayerId;
     const player = msg.state.players.find((p) => p.id === myPlayerId);
     const isMyTurn = msg.state.activePlayerId === myPlayerId;
     set({
       matchState: msg.state,
+      hasObserver: msg.hasObserver ?? get().hasObserver,
       jumpsUsed: isMyTurn ? msg.jumpsUsed : get().jumpsUsed,
       hasActed: isMyTurn ? msg.hasActed : get().hasActed,
       // Auto-select our system when state updates
@@ -562,15 +579,20 @@ function attachRoomListeners(
     state: MatchState;
     jumpsUsed: number;
     hasActed: boolean;
+    hasObserver?: boolean;
   }) => {
-    const myPlayerId = get().myPlayerId;
+    const { myPlayerId, isObserver } = get();
+    const newHasObserver = msg.hasObserver ?? get().hasObserver;
     const isMyTurn = msg.state.activePlayerId === myPlayerId;
+    // Only switch to fight view if: I am the observer, OR no observer is present
+    const showCombat = isObserver || !newHasObserver;
     set({
       combatResult: msg.result,
       matchState: msg.state,
+      hasObserver: newHasObserver,
       jumpsUsed: isMyTurn ? msg.jumpsUsed : get().jumpsUsed,
       hasActed: isMyTurn ? msg.hasActed : get().hasActed,
-      activeView: 'fight',
+      activeView: showCombat ? 'fight' : get().activeView,
       combatAttackerId: msg.attackerId,
       combatDefenderId: msg.defenderId,
       boardingLoot: msg.boardingLoot,

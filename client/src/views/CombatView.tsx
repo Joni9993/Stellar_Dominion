@@ -98,13 +98,15 @@ function computeStats(timeline: CombatEvent[]): CombatStats {
 
 // ── Battle report component ───────────────────────────────────────────────────
 
-function BattleReport({ result, iAmAttacker }: { result: CombatResult; iAmAttacker: boolean }) {
+function BattleReport({ result, iAmAttacker, asObserver }: { result: CombatResult; iAmAttacker: boolean; asObserver?: boolean }) {
   const stats = computeStats(result.timeline);
+  const factionAName = FACTIONS[result.factionA as FactionId]?.name ?? result.factionA;
+  const factionBName = FACTIONS[result.factionB as FactionId]?.name ?? result.factionB;
 
   const sides = [
     {
       key: 'mine',
-      label: 'YOUR SHIP',
+      label: asObserver ? factionAName : 'YOUR SHIP',
       factionId: iAmAttacker ? result.factionA : result.factionB,
       build:    iAmAttacker ? result.buildA : result.buildB,
       dmgBySlot: iAmAttacker ? stats.dmgBySlotA : stats.dmgBySlotB,
@@ -113,7 +115,7 @@ function BattleReport({ result, iAmAttacker }: { result: CombatResult; iAmAttack
     },
     {
       key: 'enemy',
-      label: 'ENEMY',
+      label: asObserver ? factionBName : 'ENEMY',
       factionId: iAmAttacker ? result.factionB : result.factionA,
       build:    iAmAttacker ? result.buildB : result.buildA,
       dmgBySlot: iAmAttacker ? stats.dmgBySlotB : stats.dmgBySlotA,
@@ -252,12 +254,12 @@ function BoardingRoulette({ loot, iWon, onRevealed }: {
 
 export function CombatView() {
   const store = useGameStore();
-  const { matchState, myPlayerId, combatAttackerId, combatDefenderId, connectionMode, boardingLoot } = store;
+  const { matchState, myPlayerId, combatAttackerId, combatDefenderId, connectionMode, boardingLoot, isObserver } = store;
   const player      = matchState?.players.find(p => p.id === myPlayerId);
   const combatResult = store.combatResult as CombatResult | null;
 
-  // Identify which engine side the local player is on
-  const iAmAttacker = myPlayerId === combatAttackerId;
+  // Observers always see attacker on the left (side A)
+  const iAmAttacker = isObserver ? true : (myPlayerId === combatAttackerId);
 
   // "My side" = left (facing right). "Enemy side" = right (facing left).
   const myActualSide: 'A' | 'B' = iAmAttacker ? 'A' : 'B';
@@ -411,9 +413,17 @@ export function CombatView() {
     if (bannerTimer.current) clearTimeout(bannerTimer.current);
   }, []);
 
+  // Auto-start playback for observer (no manual click needed)
+  useEffect(() => {
+    if (!isObserver || !pb || pb.phase !== 'idle' || !combatResult) return;
+    const t = setTimeout(() => startPlayback(), 600);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isObserver, pb?.phase, combatResult]);
+
   // ── No combat result ──────────────────────────────────────────────────────
 
-  if (!combatResult || !pb || !player) {
+  if (!combatResult || !pb || (!player && !isObserver)) {
     return (
       <div className="combat-empty">
         <div style={{ fontFamily: "'Press Start 2P'", fontSize: 9, color: 'var(--dim)', marginBottom: 16 }}>
@@ -452,6 +462,10 @@ export function CombatView() {
 
   const myFaction = FACTIONS[myFactionId];
 
+  // Labels for ships depend on observer vs player mode
+  const leftLabel  = isObserver ? (FACTIONS[combatResult.factionA as FactionId]?.name ?? 'ATTACKER') : 'YOU';
+  const rightLabel = isObserver ? (FACTIONS[combatResult.factionB as FactionId]?.name ?? 'DEFENDER') : 'ENEMY';
+
   // Projectile visual side: my-side shots go left→right (A), enemy shots go right→left (B)
   function visualSide(actualSide: 'A' | 'B'): 'A' | 'B' {
     return (actualSide === myActualSide) ? 'A' : 'B';
@@ -474,7 +488,7 @@ export function CombatView() {
           factionId={myFactionId}
           build={myBuild}
           facing="right"
-          label="YOU"
+          label={leftLabel}
           currentHull={myHull}     maxHull={myMaxHull}
           currentShield={myShield} maxShield={myMaxShield}
           currentEnergy={myEnergy} maxEnergy={myMaxEnergy}
@@ -504,7 +518,7 @@ export function CombatView() {
           factionId={enemyFactionId}
           build={enemyBuild}
           facing="left"
-          label="ENEMY"
+          label={rightLabel}
           currentHull={enemyHull}     maxHull={enemyMaxHull}
           currentShield={enemyShield} maxShield={enemyMaxShield}
           currentEnergy={enemyEnergy} maxEnergy={enemyMaxEnergy}
@@ -532,8 +546,36 @@ export function CombatView() {
         )}
       </div>
 
+      {/* Observer post-battle overlay */}
+      {isObserver && pb.phase === 'done' && !lootChosen && (
+        <div className="combat-victory-overlay">
+          <div className="victory-bg" />
+          <div className="victory-content">
+            <div className="victory-title" style={{ color: winnerFaction?.color }}>
+              {combatResult.winner === 'draw' ? 'DRAW' : `${winnerFaction?.name ?? '?'} WINS`}
+            </div>
+            <BattleReport result={combatResult} iAmAttacker={true} asObserver />
+            {boardingLoot && (
+              <BoardingRoulette
+                loot={boardingLoot}
+                iWon={combatResult.winner === 'A'}
+                onRevealed={() => setRouletteRevealed(true)}
+              />
+            )}
+            {(!boardingLoot || rouletteRevealed) && (
+              <div className="victory-actions">
+                <button className="btn primary" onClick={() => { setLootChosen(true); store.setView('map'); }}>
+                  ◄ MAP
+                </button>
+                <button className="btn" onClick={() => setPb(initPlayState(combatResult))}>↻ REPLAY</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Post-battle overlay */}
-      {pb.phase === 'done' && !lootChosen && (
+      {!isObserver && pb.phase === 'done' && !lootChosen && (
         <div className="combat-victory-overlay">
           <div className="victory-bg" />
           {localPlayerWon ? (

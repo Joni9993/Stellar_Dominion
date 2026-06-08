@@ -1,6 +1,7 @@
 import React from 'react';
 import { GameLayout } from './components/GameLayout';
 import { LobbyView } from './views/LobbyView';
+import { ObserverView } from './views/ObserverView';
 import { useGameStore } from './store';
 
 class ErrorBoundary extends React.Component<
@@ -35,16 +36,16 @@ class ErrorBoundary extends React.Component<
 }
 
 function AppInner() {
-  const matchState = useGameStore((s) => s.matchState);
-  const lobbyState = useGameStore((s) => s.lobbyState);
+  const matchState  = useGameStore((s) => s.matchState);
+  const lobbyState  = useGameStore((s) => s.lobbyState);
+  const isObserver  = useGameStore((s) => s.isObserver);
 
-  if (!matchState) {
+  if (!matchState || lobbyState) {
     return <LobbyView />;
   }
 
-  // lobbyState check: if we're in the online lobby waiting room, show lobby
-  if (lobbyState) {
-    return <LobbyView />;
+  if (isObserver) {
+    return <ObserverView />;
   }
 
   return <GameLayout />;
