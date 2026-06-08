@@ -68,6 +68,16 @@ export interface LobbyState {
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? 'ws://localhost:2567';
 
+function getStablePlayerId(): string {
+  const key = 'stellar-dominion-player-id';
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
 // ── Store type ────────────────────────────────────────────────────────────────
 
 type GameStore = {
@@ -174,16 +184,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   createOnlineRoom: async (playerName) => {
     const client = new ColyseusClient(SERVER_URL);
-    const room = await client.create<unknown>('game', { playerName });
+    const reconnectId = getStablePlayerId();
+    const room = await client.create<unknown>('game', { playerName, reconnectId });
     attachRoomListeners(room, set, get);
-    set({ colyseusRoom: room, connectionMode: 'online', myPlayerId: room.sessionId });
+    // Use the stable UUID as myPlayerId — it is what the server stores in matchState
+    set({ colyseusRoom: room, connectionMode: 'online', myPlayerId: reconnectId });
   },
 
   joinOnlineRoom: async (roomId, playerName) => {
     const client = new ColyseusClient(SERVER_URL);
-    const room = await client.joinById<unknown>(roomId, { playerName });
+    const reconnectId = getStablePlayerId();
+    const room = await client.joinById<unknown>(roomId, { playerName, reconnectId });
     attachRoomListeners(room, set, get);
-    set({ colyseusRoom: room, connectionMode: 'online', myPlayerId: room.sessionId });
+    set({ colyseusRoom: room, connectionMode: 'online', myPlayerId: reconnectId });
   },
 
   setFaction: (factionId) => {

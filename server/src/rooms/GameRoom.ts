@@ -84,8 +84,32 @@ export class GameRoom extends Room {
   }
 
   onJoin(client: Client, options: Record<string, string> = {}) {
-    const playerId = client.sessionId;
+    const reconnectId = options.reconnectId as string | undefined;
     const playerName = options.playerName ?? `Commander ${this.lobbyPlayers.size + 1}`;
+
+    // ── Reconnect to running game ──────────────────────────────────────────────
+    if (this.gamePhase === 'playing' && this.matchState && reconnectId) {
+      const existingPlayer = this.matchState.players.find((p) => p.id === reconnectId);
+      if (existingPlayer) {
+        // Remap stale session → new session
+        const oldSession = this.playerToSession.get(reconnectId);
+        if (oldSession) this.sessionToPlayer.delete(oldSession);
+        this.sessionToPlayer.set(client.sessionId, reconnectId);
+        this.playerToSession.set(reconnectId, client.sessionId);
+        client.send('GAME_STARTED', {
+          state: this.matchState,
+          myPlayerId: reconnectId,
+          ...this.getTurnFlagsForPlayer(reconnectId),
+        });
+        console.log(`[GameRoom] ${existingPlayer.name} reconnected (${reconnectId})`);
+        return;
+      }
+    }
+
+    // ── Normal join ───────────────────────────────────────────────────────────
+    // Use stable client-generated reconnectId as playerId when available so that
+    // a later reconnect can find this player in matchState by the same ID.
+    const playerId = reconnectId ?? client.sessionId;
 
     this.sessionToPlayer.set(client.sessionId, playerId);
     this.playerToSession.set(playerId, client.sessionId);
@@ -100,8 +124,8 @@ export class GameRoom extends Room {
       isHost: isFirstPlayer,
     });
 
-    // If rejoining a running game, send current state
     if (this.gamePhase === 'playing' && this.matchState) {
+      // New player joining an already-started game — send state so they can observe
       client.send('GAME_STARTED', {
         state: this.matchState,
         myPlayerId: playerId,
@@ -111,14 +135,14 @@ export class GameRoom extends Room {
       this.broadcastLobby();
     }
 
-    console.log(`[GameRoom] ${playerName} joined (${this.lobbyPlayers.size} players)`);
+    console.log(`[GameRoom] ${playerName} joined as ${playerId} (${this.lobbyPlayers.size} players)`);
   }
 
   async onLeave(client: Client, consented: boolean) {
     if (this.gamePhase === 'playing' && !consented) {
       try {
         await this.allowReconnection(client, 60);
-        // Reconnected — resend state
+        // Reconnected via Colyseus token within the 60 s window — resend state
         const playerId = this.sessionToPlayer.get(client.sessionId);
         if (playerId && this.matchState) {
           client.send('GAME_STARTED', {
@@ -129,18 +153,20 @@ export class GameRoom extends Room {
         }
         return;
       } catch {
-        // Reconnection timed out
+        // Reconnection timed out — fall through to cleanup
       }
     }
 
+    const playerId = this.sessionToPlayer.get(client.sessionId);
     const lobby = this.lobbyPlayers.get(client.sessionId);
-    console.log(`[GameRoom] ${lobby?.name ?? client.sessionId} left`);
+    console.log(`[GameRoom] ${lobby?.name ?? playerId ?? client.sessionId} left (consented=${consented})`);
 
     this.lobbyPlayers.delete(client.sessionId);
     this.sessionToPlayer.delete(client.sessionId);
+    // Keep playerToSession entry so a late reconnect via stable UUID can still remap.
+    // The stale session pointer is harmless because onJoin clears it on reconnect.
 
     if (this.gamePhase === 'lobby') {
-      // Transfer host if the host left
       if (client.sessionId === this.hostSessionId && this.lobbyPlayers.size > 0) {
         const newHostId = this.lobbyPlayers.keys().next().value as string;
         this.hostSessionId = newHostId;
