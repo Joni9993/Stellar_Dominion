@@ -71,7 +71,7 @@ export const LANES: [number, number][] = [
 export function laneCost(a: SystemTemplate, b: SystemTemplate): number {
   const dx = a.pos.x - b.pos.x;
   const dy = a.pos.y - b.pos.y;
-  return Math.max(8, Math.round(Math.sqrt(dx * dx + dy * dy) / 6));
+  return Math.max(5, Math.round(Math.sqrt(dx * dx + dy * dy) / 3.5));
 }
 
 // ── Home system IDs per faction (index = faction order) ──────────────────────

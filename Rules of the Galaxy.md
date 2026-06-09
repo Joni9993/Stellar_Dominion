@@ -38,7 +38,7 @@ When you select a system and see enemy commanders listed under **COMMANDERS HERE
 ### Jump Travel
 - Each turn you may jump **once per point of Jump Range** on your ship (default: 1).
 - A standard ship can jump to one adjacent system per turn. Equipping Ion Engines or Fuel Tanks increases your Jump Range, letting you jump multiple times in a single turn.
-- Each individual jump costs **fuel** (8–16 units depending on lane distance). Fuel costs are the same regardless of how many jumps you make.
+- Each individual jump costs **fuel** (5–12 units depending on lane distance). Short lanes through the galactic center are cheapest; long cross-region lanes are the most expensive. Fuel costs are the same regardless of how many jumps you make in a turn.
 - If you run out of fuel mid-turn, you cannot jump again that turn.
 
 ### Emergency Signal

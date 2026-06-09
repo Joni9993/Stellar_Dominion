@@ -22,7 +22,7 @@ export function getJumpCost(galaxy: Galaxy, fromId: number, toId: number): numbe
   const b = galaxy.systems[toId];
   const dx = a.pos.x - b.pos.x;
   const dy = a.pos.y - b.pos.y;
-  return Math.max(8, Math.round(Math.sqrt(dx * dx + dy * dy) / 6));
+  return Math.max(5, Math.round(Math.sqrt(dx * dx + dy * dy) / 3.5));
 }
 
 export function getCargoTotal(player: Player): number {

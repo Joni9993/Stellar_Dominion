@@ -2070,8 +2070,8 @@ body {
   flex: 1;
   position: relative;
   overflow: hidden;
-  cursor: pointer;
   min-height: 0;
+  /* no cursor: pointer — game is interactive, not a tap target */
 }
 
 /* GameLayout fills the inst-game container */
@@ -2082,32 +2082,31 @@ body {
   height: 100%;
 }
 
-.inst-tap-hint {
+/* ── Annotation panel — floats over the bottom of the game ── */
+.inst-panel {
   position: absolute;
-  bottom: 38px; /* above act-bar */
-  right: 12px;
-  font-family: 'Press Start 2P';
-  font-size: 7px;
-  color: var(--faint);
-  letter-spacing: 0.5px;
-  pointer-events: none;
-  opacity: 0.6;
+  bottom: 32px; /* sit above the act-bar (32px) */
+  left: 0;
+  right: 0;
   z-index: 25;
-}
-
-.inst-bottom {
-  flex-shrink: 0;
+  background: rgba(12, 16, 24, 0.90);
+  border-top: 2px solid var(--teal);
   display: flex;
   flex-direction: column;
-  border-top: 2px solid var(--teal);
-  background: var(--panel);
+  max-height: 50%; /* never cover more than half the screen */
 }
 
-.inst-ann-sheet {
-  max-height: 175px;
+/* Landscape-only header inside the panel — hidden in portrait */
+.inst-panel-header {
+  display: none;
+}
+
+.inst-ann-list {
   overflow-y: auto;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--line);
+  padding: 8px 12px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
 .tour-title {
@@ -2309,41 +2308,43 @@ body {
   /* ── Quick Guide ─────────────────────────────────────────────────────────── */
   .tour-card { max-height: calc(100dvh - 24px); }
 
-  /* ── Instructions (landscape: side-by-side) ─────────────────────────────── */
+  /* ── Instructions (landscape: panel moves to right side) ─────────────── */
   @media (orientation: landscape) and (max-height: 520px) {
-    .inst-overlay {
-      flex-direction: row;
-    }
-    .inst-topbar {
-      display: none; /* header moves into sidebar */
-    }
-    .inst-game {
-      flex: 1;
-    }
-    .inst-bottom {
-      width: 260px;
-      flex-shrink: 0;
-      flex-direction: column;
+    .inst-overlay { flex-direction: column; } /* stays column, topbar on top */
+
+    .inst-topbar { display: none; } /* replaced by in-panel header */
+
+    .inst-game { flex: 1; }
+
+    /* Panel becomes a vertical right-side column */
+    .inst-panel {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: auto;
+      right: 0;
+      width: 250px;
+      max-height: none;
       border-top: none;
       border-left: 2px solid var(--teal);
-      overflow: hidden;
     }
-    .inst-bottom::before {
-      /* Compact header inside sidebar for landscape */
-      content: '';
-      display: block;
-      height: 0;
-    }
-    .inst-ann-sheet {
-      flex: 1;
-      max-height: none;
-      overflow-y: auto;
-    }
-    .tour-nav {
+
+    /* Show the header inside the panel for landscape */
+    .inst-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel2);
       flex-shrink: 0;
     }
-    .inst-tap-hint {
-      bottom: 8px;
+
+    .inst-ann-list {
+      flex: 1;
+      overflow-y: auto;
     }
+
+    .inst-title-badge { max-width: 110px; }
   }
 }
