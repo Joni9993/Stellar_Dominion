@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { GameLayout } from './components/GameLayout';
 import { LobbyView } from './views/LobbyView';
 import { ObserverView } from './views/ObserverView';
+import { InstructionsOverlay } from './components/InstructionsOverlay';
 import { useGameStore } from './store';
 
 class ErrorBoundary extends React.Component<
@@ -53,6 +54,7 @@ function AppInner() {
   const lobbyState       = useGameStore((s) => s.lobbyState);
   const isObserver       = useGameStore((s) => s.isObserver);
   const isReconnecting   = useGameStore((s) => s.isReconnecting);
+  const tourActive       = useGameStore((s) => s.tourActive);
   const attemptReconnect = useGameStore((s) => s.attemptReconnect);
   const colyseusRoom     = useGameStore((s) => s.colyseusRoom);
 
@@ -62,6 +64,8 @@ function AppInner() {
   }, []);
 
   if (isReconnecting) return <ReconnectingScreen />;
+
+  if (tourActive) return <InstructionsOverlay />;
 
   if (!matchState || lobbyState) {
     return <LobbyView />;

@@ -1973,54 +1973,49 @@ body {
 
 /* ── Quick Guide / Tour overlay ──────────────────────────────────────────── */
 
-/* Full-screen tour overlay */
-.tour-overlay {
+/* ── Quick Guide (TourOverlay) ───────────────────────────────────────────── */
+.tour-backdrop {
   position: fixed;
   inset: 0;
   z-index: 300;
-  background: var(--void);
+  background: rgba(7, 10, 16, 0.82);
   display: flex;
-  flex-direction: column;
-  outline: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
 }
 
-.tour-topbar {
-  flex-shrink: 0;
+.tour-card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: calc(100vh - 32px);
+}
+
+.tour-header {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--panel2);
-}
-
-.tour-screen {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  min-height: 0;
-}
-
-.tour-tap-hint {
-  position: absolute;
-  bottom: 10px;
-  right: 14px;
-  font-family: 'Press Start 2P';
-  font-size: 7px;
-  color: var(--faint);
-  letter-spacing: 0.5px;
-  pointer-events: none;
-  opacity: 0.7;
-}
-
-.tour-ann-sheet {
   flex-shrink: 0;
-  max-height: 210px;
-  overflow-y: auto;
+}
+
+.tour-mockup {
+  padding: 10px;
+  background: var(--void2);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.tour-body {
   padding: 12px 14px;
-  border-top: 1px solid var(--line);
-  background: var(--panel);
+  overflow-y: auto;
 }
 
 .tour-screen-badge {
@@ -2035,6 +2030,84 @@ body {
   font-family: 'Press Start 2P';
   font-size: 7px;
   color: var(--faint);
+}
+
+/* ── Instructions Overlay ────────────────────────────────────────────────── */
+.inst-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  background: var(--void);
+  outline: none;
+}
+
+.inst-topbar {
+  flex-shrink: 0;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel2);
+}
+
+.inst-title-badge {
+  font-family: 'Press Start 2P';
+  font-size: 7px;
+  color: var(--bone);
+  margin-left: 4px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.inst-game {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  min-height: 0;
+}
+
+/* GameLayout fills the inst-game container */
+.inst-game .game-layout,
+.inst-game .screen {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+.inst-tap-hint {
+  position: absolute;
+  bottom: 38px; /* above act-bar */
+  right: 12px;
+  font-family: 'Press Start 2P';
+  font-size: 7px;
+  color: var(--faint);
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  opacity: 0.6;
+  z-index: 25;
+}
+
+.inst-bottom {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid var(--teal);
+  background: var(--panel);
+}
+
+.inst-ann-sheet {
+  max-height: 175px;
+  overflow-y: auto;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
 }
 
 .tour-title {
@@ -2233,6 +2306,44 @@ body {
   .win-stats { width: 100%; }
   .battle-report { width: 100%; }
 
-  /* ── Tour overlay ────────────────────────────────────────────────────────── */
-  .tour-ann-sheet { max-height: 180px; }
+  /* ── Quick Guide ─────────────────────────────────────────────────────────── */
+  .tour-card { max-height: calc(100dvh - 24px); }
+
+  /* ── Instructions (landscape: side-by-side) ─────────────────────────────── */
+  @media (orientation: landscape) and (max-height: 520px) {
+    .inst-overlay {
+      flex-direction: row;
+    }
+    .inst-topbar {
+      display: none; /* header moves into sidebar */
+    }
+    .inst-game {
+      flex: 1;
+    }
+    .inst-bottom {
+      width: 260px;
+      flex-shrink: 0;
+      flex-direction: column;
+      border-top: none;
+      border-left: 2px solid var(--teal);
+      overflow: hidden;
+    }
+    .inst-bottom::before {
+      /* Compact header inside sidebar for landscape */
+      content: '';
+      display: block;
+      height: 0;
+    }
+    .inst-ann-sheet {
+      flex: 1;
+      max-height: none;
+      overflow-y: auto;
+    }
+    .tour-nav {
+      flex-shrink: 0;
+    }
+    .inst-tap-hint {
+      bottom: 8px;
+    }
+  }
 }

@@ -14,6 +14,7 @@ export function LobbyView() {
     startOnlineGame,
     attemptReconnect,
     isReconnecting,
+    startTour,
   } = useGameStore();
 
   const [savedGame, setSavedGame] = useState<GameSummary | null>(null);
@@ -106,6 +107,13 @@ export function LobbyView() {
                 onClick={() => setTourOpen(true)}
               >
                 ? QUICK GUIDE
+              </button>
+              <button
+                className="btn secondary large"
+                style={{ opacity: 0.7, fontSize: 13 }}
+                onClick={startTour}
+              >
+                ► INSTRUCTIONS
               </button>
             </div>
           </div>

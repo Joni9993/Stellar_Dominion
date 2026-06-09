@@ -157,6 +157,11 @@ type GameStore = {
   // Game init (local)
   initGame: (seed?: number) => void;
 
+  // Tour
+  tourActive: boolean;
+  startTour: () => void;
+  endTour: () => void;
+
   // Navigation
   selectSystem: (id: number) => void;
   setView: (view: GameView) => void;
@@ -203,6 +208,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   hasObserver: false,
   isReconnecting: false,
 
+  tourActive: false,
   matchState: null,
   selectedSystemId: null,
   activeView: 'map',
@@ -436,6 +442,35 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
       set({ matchState: next, activeView: 'map', hasActed: true });
     }
+  },
+
+  // ── Tour ─────────────────────────────────────────────────────────────────
+
+  startTour: () => {
+    get().initGame(42);
+    const ms = get().matchState;
+    if (ms) {
+      const stationSys = ms.galaxy.systems.find((s) => s.hasStation);
+      const sysId = stationSys?.id ?? 0;
+      set({
+        tourActive: true,
+        selectedSystemId: sysId,
+        matchState: { ...ms, players: ms.players.map((p) => ({ ...p, systemId: sysId })) },
+      });
+    } else {
+      set({ tourActive: true });
+    }
+  },
+
+  endTour: () => {
+    set({
+      tourActive: false,
+      matchState: null,
+      activeView: 'map',
+      selectedSystemId: null,
+      isStationOpen: false,
+      combatResult: null,
+    });
   },
 
   // ── Navigation ────────────────────────────────────────────────────────────
