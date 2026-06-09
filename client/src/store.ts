@@ -84,6 +84,23 @@ function saveRoomId(id: string) { localStorage.setItem(ROOM_ID_KEY, id); }
 function clearRoomId() { localStorage.removeItem(ROOM_ID_KEY); }
 function getSavedRoomId(): string | null { return localStorage.getItem(ROOM_ID_KEY); }
 
+const GAME_SUMMARY_KEY = 'stellar-dominion-game-summary';
+export interface GameSummary {
+  roomId: string;
+  myPlayerId: string;
+  players: { id: string; name: string; factionId: string; color: string }[];
+  activePlayerId: string;
+  cycle: number;
+  maxCycles: number;
+}
+function saveGameSummary(s: GameSummary) { localStorage.setItem(GAME_SUMMARY_KEY, JSON.stringify(s)); }
+function clearGameSummary() { localStorage.removeItem(GAME_SUMMARY_KEY); }
+export function getSavedGameSummary(): GameSummary | null {
+  const raw = localStorage.getItem(GAME_SUMMARY_KEY);
+  if (!raw) return null;
+  try { return JSON.parse(raw) as GameSummary; } catch { return null; }
+}
+
 // ── Store type ────────────────────────────────────────────────────────────────
 
 type GameStore = {
@@ -219,6 +236,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   leaveGame: () => {
     clearRoomId(); // clear BEFORE leave() so onLeave doesn't trigger auto-reconnect
+    clearGameSummary();
     const { colyseusRoom } = get();
     colyseusRoom?.leave();
     set({ colyseusRoom: null, matchState: null, lobbyState: null, isReconnecting: false, isObserver: false });
@@ -583,6 +601,15 @@ function attachRoomListeners(
   room.onMessage('GAME_STARTED', (msg: { state: MatchState; myPlayerId: string; isObserver?: boolean; hasObserver?: boolean; jumpsUsed: number; hasActed: boolean }) => {
     const isObs = msg.isObserver === true || !msg.state.players.find((p) => p.id === msg.myPlayerId);
     const player = msg.state.players.find((p) => p.id === msg.myPlayerId);
+    const isReconnect = get().matchState !== null; // already in a game → reconnect, don't reset StarMap
+    saveGameSummary({
+      roomId: room.id,
+      myPlayerId: msg.myPlayerId,
+      players: msg.state.players.map((p) => ({ id: p.id, name: p.name, factionId: p.factionId, color: p.color })),
+      activePlayerId: msg.state.activePlayerId,
+      cycle: msg.state.cycle,
+      maxCycles: msg.state.maxCycles,
+    });
     set({
       matchState: msg.state,
       myPlayerId: msg.myPlayerId,
@@ -594,7 +621,7 @@ function attachRoomListeners(
       activeView: 'map',
       combatResult: null,
       selectedSystemId: player?.systemId ?? null,
-      gameSeed: Date.now(), // force MapView to recreate StarMap for new game
+      gameSeed: isReconnect ? get().gameSeed : Date.now(),
     });
   });
 
@@ -602,12 +629,19 @@ function attachRoomListeners(
     const myPlayerId = get().myPlayerId;
     const player = msg.state.players.find((p) => p.id === myPlayerId);
     const isMyTurn = msg.state.activePlayerId === myPlayerId;
+    const savedSummary = getSavedGameSummary();
+    if (savedSummary) {
+      saveGameSummary({
+        ...savedSummary,
+        activePlayerId: msg.state.activePlayerId,
+        cycle: msg.state.cycle,
+      });
+    }
     set({
       matchState: msg.state,
       hasObserver: msg.hasObserver ?? get().hasObserver,
       jumpsUsed: isMyTurn ? msg.jumpsUsed : get().jumpsUsed,
       hasActed: isMyTurn ? msg.hasActed : get().hasActed,
-      // Auto-select our system when state updates
       selectedSystemId: player?.systemId ?? get().selectedSystemId,
     });
   });

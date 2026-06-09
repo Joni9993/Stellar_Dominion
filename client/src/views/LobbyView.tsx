@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useGameStore } from '../store';
+import React, { useState, useEffect } from 'react';
+import { useGameStore, getSavedGameSummary, type GameSummary } from '../store';
 import { FACTIONS, FACTION_IDS } from '@stellar-dominion/shared';
 import type { FactionId } from '@stellar-dominion/shared';
 import { TourOverlay } from '../components/TourOverlay';
@@ -12,7 +12,15 @@ export function LobbyView() {
     setFaction,
     setObserver,
     startOnlineGame,
+    attemptReconnect,
+    isReconnecting,
   } = useGameStore();
+
+  const [savedGame, setSavedGame] = useState<GameSummary | null>(null);
+
+  useEffect(() => {
+    setSavedGame(getSavedGameSummary());
+  }, []);
 
   const [joinCode, setJoinCode] = useState('');
   const [playerName, setPlayerName] = useState('COMMANDER');
@@ -65,6 +73,14 @@ export function LobbyView() {
                 onChange={(e) => setPlayerName(e.target.value.toUpperCase())}
               />
             </div>
+
+            {savedGame && (
+              <ResumeCard
+                summary={savedGame}
+                loading={isReconnecting}
+                onResume={() => attemptReconnect()}
+              />
+            )}
 
             {error && <div className="lobby-error">{error}</div>}
 
@@ -249,4 +265,48 @@ export function LobbyView() {
   }
 
   return null;
+}
+
+// ── Resume Game Card ──────────────────────────────────────────────────────────
+
+function ResumeCard({ summary, loading, onResume }: { summary: GameSummary; loading: boolean; onResume: () => void }) {
+  const activePlayer = summary.players.find((p) => p.id === summary.activePlayerId);
+  const isMyTurn = summary.activePlayerId === summary.myPlayerId;
+  const factionColor = activePlayer ? (FACTIONS[activePlayer.factionId as FactionId]?.color ?? '#4ecdc4') : '#4ecdc4';
+
+  return (
+    <div className="resume-card">
+      <div className="resume-card-header">ACTIVE GAME</div>
+      <div className="resume-card-info">
+        <span className="resume-card-cycle">CYC {summary.cycle}/{summary.maxCycles}</span>
+        <span
+          className="resume-card-turn"
+          style={{ color: isMyTurn ? 'var(--green)' : factionColor }}
+        >
+          {isMyTurn ? '▶ YOUR TURN' : `Waiting for ${activePlayer?.name ?? '?'}`}
+        </span>
+      </div>
+      <div className="resume-card-players">
+        {summary.players.map((p) => {
+          const fc = FACTIONS[p.factionId as FactionId];
+          return (
+            <span
+              key={p.id}
+              className="resume-card-player"
+              style={{ color: p.id === summary.activePlayerId ? (fc?.color ?? '#e9e3d4') : 'var(--dim)' }}
+            >
+              {p.id === summary.activePlayerId ? '▲ ' : ''}{p.name}
+            </span>
+          );
+        })}
+      </div>
+      <button
+        className="btn primary large"
+        disabled={loading}
+        onClick={onResume}
+      >
+        {loading ? '…RECONNECTING' : '↩ RESUME GAME'}
+      </button>
+    </div>
+  );
 }

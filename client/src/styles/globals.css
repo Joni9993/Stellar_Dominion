@@ -1690,6 +1690,37 @@ body {
 
 .lobby-btn-group { display: flex; flex-direction: column; gap: 10px; }
 
+/* ── Resume Game Card ──────────────────────────────────────────────────────── */
+.resume-card {
+  border: 1px solid var(--teal);
+  background: rgba(78, 205, 196, 0.05);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.resume-card-header {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--teal);
+  letter-spacing: 1px;
+}
+.resume-card-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+.resume-card-cycle { color: var(--dim); font-size: 12px; }
+.resume-card-turn  { font-size: 13px; font-weight: bold; }
+.resume-card-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-size: 12px;
+}
+.resume-card-player { white-space: nowrap; }
+
 .btn.large { font-size: 16px; padding: 12px 20px; }
 .btn.secondary {
   background: var(--panel3);
