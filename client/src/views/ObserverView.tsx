@@ -169,49 +169,53 @@ export function ObserverView() {
   const activePlayer  = matchState.players.find((p) => p.id === matchState.activePlayerId);
   const activeFaction = activePlayer ? FACTIONS[activePlayer.factionId] : null;
 
+  const inCombat = activeView === 'fight';
+
   return (
-    <div style={{ position: 'fixed', inset: 0 }}>
-      {/* Full-screen star map */}
-      <div className="map-canvas-wrap" style={{ position: 'absolute', inset: 0 }}>
-        <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
+    <div style={{ position: 'fixed', inset: 0, background: '#0c1018' }}>
+      {/* ── Star map — hidden during combat ── */}
+      <div style={{ display: inCombat ? 'none' : 'block', position: 'absolute', inset: 0 }}>
+        <div className="map-canvas-wrap" style={{ position: 'absolute', inset: 0 }}>
+          <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
 
-        <div className="corner tl">
-          STELLAR DOMINION · OBSERVER<br />
-          {matchState.players.length} COMMANDER{matchState.players.length !== 1 ? 'S' : ''}
-        </div>
-        <div className="corner tr">
-          CYCLE {matchState.cycle} / {matchState.maxCycles}<br />
-          WIN AT {matchState.winThreshold} ARTIFACTS
-        </div>
-
-        {/* Rumor banner */}
-        {rumorArtifact && rumorSystem && (
-          <div className="rumor-bar">
-            RUMOR · {rumorArtifact.name.toUpperCase()} SIGHTED IN {rumorSystem.name.toUpperCase()} · {rumor.price}◈
+          <div className="corner tl">
+            STELLAR DOMINION · OBSERVER<br />
+            {matchState.players.length} COMMANDER{matchState.players.length !== 1 ? 'S' : ''}
           </div>
-        )}
-
-        {/* Active player indicator */}
-        {activePlayer && (
-          <div
-            className="observer-active-player"
-            style={{ color: activeFaction?.color ?? 'var(--bone)' }}
-          >
-            ► {activePlayer.name} COMMANDING
+          <div className="corner tr">
+            CYCLE {matchState.cycle} / {matchState.maxCycles}<br />
+            WIN AT {matchState.winThreshold} ARTIFACTS
           </div>
+
+          {/* Rumor banner — map only */}
+          {rumorArtifact && rumorSystem && (
+            <div className="rumor-bar">
+              RUMOR · {rumorArtifact.name.toUpperCase()} SIGHTED IN {rumorSystem.name.toUpperCase()} · {rumor.price}◈
+            </div>
+          )}
+
+          {/* Active player indicator */}
+          {activePlayer && (
+            <div
+              className="observer-active-player"
+              style={{ color: activeFaction?.color ?? 'var(--bone)' }}
+            >
+              ► {activePlayer.name} COMMANDING
+            </div>
+          )}
+        </div>
+
+        {/* System info panel */}
+        {selectedSystem !== null && (
+          <ObserverSystemPanel
+            systemId={selectedSystem}
+            onClose={() => setSelectedSystem(null)}
+          />
         )}
       </div>
 
-      {/* System info panel — shown when a system is selected, hidden during combat */}
-      {selectedSystem !== null && activeView !== 'fight' && (
-        <ObserverSystemPanel
-          systemId={selectedSystem}
-          onClose={() => setSelectedSystem(null)}
-        />
-      )}
-
-      {/* Combat overlay — auto-triggered when COMBAT_RESULT received */}
-      {activeView === 'fight' && (
+      {/* ── Combat — full screen, no map behind it ── */}
+      {inCombat && (
         <div style={{ position: 'absolute', inset: 0 }}>
           <CombatView />
         </div>
