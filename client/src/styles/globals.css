@@ -457,6 +457,28 @@ body {
   white-space: nowrap;
 }
 
+/* ── Observer combat wrapper — fullscreen CombatView on observer device ── */
+.observer-combat-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #0c1018;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Force the inner flex chain to fill the viewport height */
+.observer-combat-wrap .combat-view {
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
+}
+
+.observer-combat-wrap .combat-stage {
+  flex: 1 1 0%;
+  min-height: 0;
+}
+
 /* ── Map canvas container ────────────────────────────────────────────────── */
 .map-canvas-wrap {
   flex: 1;

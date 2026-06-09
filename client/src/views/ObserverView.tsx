@@ -221,7 +221,7 @@ export function ObserverView() {
 
       {/* ── Combat — position:fixed + zIndex:1000 overrides WebGL compositing ── */}
       {inCombat && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: '#0c1018', display: 'flex', flexDirection: 'column' }}>
+        <div className="observer-combat-wrap">
           <CombatView />
         </div>
       )}
