@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useGameStore, selectMyPlayer, selectCurrentSystem, selectReachableSystems } from '../store';
-import { ARTIFACTS, CREW, PARTS, canClaimArtifact, deriveStats } from '@stellar-dominion/shared';
+import { ARTIFACTS, CREW, PARTS, canClaimArtifact, deriveStats, isStranded } from '@stellar-dominion/shared';
 import type { Player } from '@stellar-dominion/shared';
 import { CommanderModal } from './CommanderModal';
 
 export function MapPanel() {
   const store = useGameStore();
-  const { matchState, selectedSystemId, myPlayerId, setView, jump, openStation, jumpsUsed, hasActed, claimArtifact, startCombat } = store;
+  const { matchState, selectedSystemId, myPlayerId, setView, jump, openStation, jumpsUsed, hasActed, claimArtifact, startCombat, emergencySignal } = store;
   const [targetModalOpen, setTargetModalOpen] = useState(false);
   const [viewingCommander, setViewingCommander] = useState<Player | null>(null);
 
@@ -29,6 +29,7 @@ export function MapPanel() {
   const jumpCost    = sys ? reachable.get(sys.id) : undefined;
   const canJumpHere = jumpsUsed < maxJumps && jumpCost !== undefined && (me?.fuel ?? 0) >= jumpCost;
   const claimCheck  = isMySystem && isRumor && me ? canClaimArtifact(matchState, myPlayerId) : { ok: false, reason: '' };
+  const stranded    = me ? isStranded(matchState, myPlayerId) : false;
 
   function handleAttack() {
     if (rivalsInSys.length === 1) {
@@ -175,13 +176,27 @@ export function MapPanel() {
             ✦ CLAIM · {rumor.price}◈
           </button>
         )}
-        {!isMySystem && (
+        {isMySystem && stranded && (
+          <button
+            className="btn danger"
+            onClick={emergencySignal}
+            title="Teleport to home system · Fuel restored to 40 · Turn ends"
+          >
+            ⚠ EMERGENCY SIGNAL
+          </button>
+        )}
+        {!isMySystem && !stranded && (
           <button
             className="btn"
             disabled={!canJumpHere}
             title={jumpsUsed >= maxJumps ? 'No jumps remaining this turn' : jumpCost === undefined ? 'Not adjacent' : ''}
             onClick={() => canJumpHere && jump(sys.id)}
           >
+            JUMP HERE {jumpCost !== undefined ? `· ${jumpCost}⛽` : ''}
+          </button>
+        )}
+        {!isMySystem && stranded && (
+          <button className="btn" disabled title="Stranded — use Emergency Signal from your current system">
             JUMP HERE {jumpCost !== undefined ? `· ${jumpCost}⛽` : ''}
           </button>
         )}

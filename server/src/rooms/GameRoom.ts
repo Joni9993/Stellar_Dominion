@@ -20,6 +20,7 @@ import {
   canClaimArtifact,
   canBuyModule,
   canSellModule,
+  canEmergencySignal,
   doJump,
   doBuyGood,
   doSellGood,
@@ -29,9 +30,10 @@ import {
   doClaimArtifact,
   doBuyModule,
   doSellModule,
+  doEmergencySignal,
+  doEndTurn,
   rollBoardingLoot,
   doApplyBoardingLoot,
-  doEndTurn,
   checkWin,
   createInitialMatchState,
 } from '@stellar-dominion/shared';
@@ -445,6 +447,23 @@ export class GameRoom extends Room {
         }
         this.matchState = doHireCrew(state, playerId, slot, crewId, cost);
         this.broadcastState();
+        break;
+      }
+
+      case 'EMERGENCY_SIGNAL': {
+        const r = canEmergencySignal(state, playerId);
+        if (!r.ok) { client.send('ERROR', { message: r.reason }); return; }
+        this.matchState = doEmergencySignal(state, playerId);
+        this.matchState = doEndTurn(this.matchState);
+        const nextPlayerIdEmergency = this.matchState.activePlayerId;
+        this.resetTurnFlags(nextPlayerIdEmergency);
+        const nextFlagsEmergency = this.turnFlags.get(nextPlayerIdEmergency)!;
+        this.broadcast('STATE_UPDATE', {
+          state: this.matchState,
+          jumpsUsed: nextFlagsEmergency.jumpsUsed,
+          hasActed: nextFlagsEmergency.hasActed,
+          hasObserver: this.getHasObserver(),
+        });
         break;
       }
 

@@ -2,7 +2,7 @@
 
 export type FactionId = 'VOLKESH' | 'KORTHAAR' | 'IDRYN' | 'NYXARI' | 'RASK' | 'VAESH';
 export type GoodId    = 'ore' | 'data' | 'tech' | 'bio' | 'fuel_cells';
-export type PartType  = 'weapon' | 'shield' | 'armor' | 'pointdef' | 'gen' | 'cap' | 'engine' | 'util' | 'artifact';
+export type PartType  = 'weapon' | 'shield' | 'armor' | 'pointdef' | 'gen' | 'cap' | 'engine' | 'util' | 'cargo' | 'artifact';
 export type DamageType  = 'laser' | 'kinetic' | 'missile';
 export type DefenseType = 'shield' | 'armor' | 'pointdef';
 export type Zone         = 'bow' | 'core' | 'stern';

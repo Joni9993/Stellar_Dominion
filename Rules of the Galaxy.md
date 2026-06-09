@@ -65,6 +65,15 @@ When you select a system and see enemy commanders listed under **COMMANDERS HERE
 - Each individual jump costs **fuel** (8–16 units depending on lane distance). Fuel costs are the same regardless of how many jumps you make.
 - If you run out of fuel mid-turn, you cannot jump again that turn.
 
+### Emergency Signal
+If you don't have enough fuel to reach **any** neighboring system, you are stranded. When you select your own system on the map, a red **⚠ EMERGENCY SIGNAL** button appears in place of the normal movement options.
+
+- Press it to **immediately teleport back to your home system**.
+- Your fuel is restored to **40 units**.
+- Your **turn ends immediately** — you get no further actions that round.
+
+The emergency signal is always available if you are truly stranded. It cannot be used as a shortcut when you still have enough fuel to jump somewhere.
+
 ---
 
 ## TURNS & PHASES
@@ -223,8 +232,8 @@ Each faction has a distinct **ship silhouette** (visible in the Shipyard and in 
 #### Vaesh Exclusive Modules
 | Module | Type | Combat Effect | Cost |
 |---|---|---|---|
-| **Advanced Reactor** | Generator | +14 energy/tick, +30 max energy | 220◈ |
-| **Advanced Capacitor** | Capacitor | +6 energy/tick, +80 max energy | 200◈ |
+| **Advanced Reactor** | Generator | +14 energy/tick, +50 max energy | 220◈ |
+| **Advanced Capacitor** | Capacitor | +6 energy/tick, +60 max energy | 200◈ |
 
 These modules are sold **only at Dustfall** (Vaesh home system) and only commanders playing as Vaesh can purchase them. They appear in the MODULES tab at Dustfall alongside the 3 standard modules offered there. When owned, they show in the Shipyard inventory palette marked as **VAESH TECH**.
 
@@ -261,11 +270,15 @@ The grid is divided into three horizontal rows, each with different bonuses:
 | Bottom (slots 7–9) | **STERN** | Recommended zone for engines and utility modules; no additional zone bonus |
 
 ### Adjacency Bonuses
-Certain module combinations create bonus effects when placed **next to each other** in the grid:
-- **Reactor next to a Weapon** → both modules gain **+15% fire rate**
-- **Capacitor next to a Weapon** → both modules gain **+15% fire rate**
+Certain module combinations create a bonus when placed **next to each other** in the grid. Only the weapon benefits and lights up with a **+FR** badge — the energy module does not:
 
-Place your Reactor or Capacitor adjacent to your main weapon in the CORE row for maximum output. Both the energy module and the weapon light up with a **+FR** badge when the bonus is active.
+| Weapon | Benefits from | Effect |
+|---|---|---|
+| **Pulse Laser** | Adjacent **Reactor** | −15% cooldown (fires faster) |
+| **Railgun** | Adjacent **Capacitor** | −15% cooldown (fires faster) |
+| **Missile Pod** | Adjacent **Cargo Bay** | −15% cooldown (more ammo space = faster reload) |
+
+The **Shield Projector** also benefits from adjacency: when placed next to any Reactor or Capacitor, its shield regen increases from **0.33 → 0.5 per tick**.
 
 ### Your Crew (separate from the grid)
 Two crew slots sit at the **nose of the ship**, outside the 9-slot grid. You can hire and swap crew at stations. Crew bonuses stack with faction passives.
@@ -299,11 +312,11 @@ Two crew slots sit at the **nose of the ship**, outside the 9-slot grid. You can
 ### Utility & Power
 | Module | What it does | Best Zone |
 |---|---|---|
-| Reactor | +energy per tick (powers weapons) | Core |
-| Capacitor | +energy storage (enables burst fire) | Core |
+| Reactor | +8 energy/tick · +40 max energy. A **Pulse Laser** placed next to it gains −15% cooldown (the Laser fires faster; the Reactor does not glow). | Core |
+| Capacitor | +4 energy/tick · +20 max energy. A **Railgun** placed next to it gains −15% cooldown (the Railgun fires faster; the Capacitor does not glow). | Core |
 | Ion Engine | **+10% evasion** (enemy shots miss more) and **+1 Jump Range** (one extra jump per turn) | Stern |
 | Fuel Tank | **+2 Jump Range** (two extra jumps per turn) | Stern |
-| Cargo Bay | **+30 cargo capacity** | Any |
+| Cargo Bay | **+30 cargo capacity**. A **Missile Pod** placed next to it gains −15% cooldown (more ammo space = faster reload). | Any |
 
 ### Artifacts
 Artifacts sit in a **Core or any slot** and provide a powerful active combat ability. They count toward your victory total. Having many is powerful — but each one takes a slot away from weapons and shields.
@@ -362,7 +375,7 @@ Every ship has an energy pool that powers its weapons. Without energy a weapon c
 | Value | Base (no generator) | With Reactor | With Capacitor |
 |---|---|---|---|
 | Energy/tick | 1 | +8 (total 9) | +4 (total 5) |
-| Max energy | 30 | +20 (total 50) | +40 (total 70) |
+| Max energy | 30 | +40 (total 70) | +20 (total 50) |
 | Starting energy | 10 | 10 | 10 |
 
 **Why this matters:** With only 1 energy/tick, a Railgun (cost 20) takes 20 ticks to fully recharge. A Pulse Laser (cost 8) takes 8 ticks. Without a Reactor or Capacitor, running two heavy weapons simultaneously will drain your energy pool and force weapons to wait — they stay charged but idle until enough energy builds up. A Reactor eliminates this bottleneck entirely.
@@ -375,11 +388,11 @@ The Adjacency Bonus (Reactor/Capacitor next to a Weapon) also reduces that weapo
 
 | Part | Combat effect |
 |---|---|
-| Shield Projector | +60 shield pool, +0.33 shield/tick regeneration |
+| Shield Projector | +60 shield pool, +0.33 shield/tick regen (→ 0.5/tick when adjacent to Reactor or Capacitor) |
 | Armor Plate | +40 hull, flat 6 damage reduction per hit |
 | Point-Defense | 50% chance to intercept each incoming missile |
-| Reactor | +8 energy/tick, +20 energy maximum |
-| Capacitor | +4 energy/tick, +40 energy maximum (good for burst weapons) |
+| Reactor | +8 energy/tick, +40 energy maximum |
+| Capacitor | +4 energy/tick, +20 energy maximum |
 | Ion Engine | +10% evasion |
 
 **Faction artifact effects in combat:**
@@ -415,4 +428,4 @@ Idryn Concord with **Concord Prism** amplifies all of the above by ×1.25 — th
 
 ---
 
-*Rules of the Galaxy v2.2 — Artifact overhaul: Boarding Hook renamed to Weapon Jammer (now triggers on own hull <30%, one-time, 4s disable). Far Sight evasion corrected to +15%. Gilded Aegis cooldown 1.2s→6s. Null Field redesigned (regen-block only, no shield wipe; fires at combat start + every 8s). Phase Drive redesigned (6s cycle → 1s dodge window at 50% per hit). Siege Battery reduced to +10% hull damage only. Repair Swarm corrected to 0.5 HP/tick. Chrono Capacitor corrected to 3s duration. Previous v2.1 — Combat duration rebalance: all weapon damage significantly reduced (Laser 12→3, Railgun 32→8, Missile 20→5), Shield Projector regen reduced (1→0.33/tick), base hull increased (100→150 HP). Target fight duration is now 5–15 seconds. Previous v2.0 — Faction passives removed: all factions now start on equal stat footing; faction identity comes from their starting Artifact only. Balance changes: Railgun damage 28→32, Missile Pod cooldown 18→20 ticks, Shield Projector regen 2→1 per tick, Point-Defense intercept 65%→50%. Sell price bonus (Trader crew ×1.20) is the only sell multiplier remaining. Previous: v1.9 — Energy system: Base energy regeneration reduced from 5/tick to 1/tick. Generators are now meaningful — running 2+ weapons without a Reactor will cause weapons to stall waiting for energy. Combat tick system documented in full (50 ticks/s, 1500 tick max). Previous: v1.8 — Module ownership system: Modules are now purchased at stations (MODULES tab) and owned individually. Shipyard palette shows only modules you own, not all modules in the game. Each station offers 3 randomly assigned standard modules (seeded, balanced distribution across the galaxy). Vaesh home station (Dustfall) additionally offers the 2 Vaesh-exclusive modules. Sell owned (unequipped) modules for 50% buy price at any station. Starter build modules are pre-owned (in the grid from the start); removing them sends them to inventory. Grid drag-and-drop now supports within-grid swaps. Previous: v1.7 — Jump Range rework: Range stat controls jumps per turn (default 1). Ion Engine +1 Jump Range, Fuel Tank +2 Jump Range. Evasion flat 10% (no zone bonus). Zone effects and adjacency bonuses corrected. Shipyard UI: tap-for-info, drag-to-place, zone ? buttons, turn lock.*
+*Rules of the Galaxy v2.4 — Module balance pass: Reactor max energy +20→+40, Capacitor max energy +40→+20, Advanced Reactor +50, Advanced Capacitor +60. Adjacency rework: Pulse Laser benefits only from Reactor, Railgun only from Capacitor, Missile Pod from Cargo Bay (lore: more cargo space = faster reload). Only the weapon gets the −15% cooldown and glows — generators do not. Shield Projector now gains +0.17 regen/tick (0.33→0.5) when adjacent to any Reactor or Capacitor. Previous: v2.3 — Emergency Signal mechanic added: stranded players (no fuel to reach any neighbor) can teleport to their home system with 40 fuel, ending their turn immediately. Previous: v2.2 — Artifact overhaul: Boarding Hook renamed to Weapon Jammer (now triggers on own hull <30%, one-time, 4s disable). Far Sight evasion corrected to +15%. Gilded Aegis cooldown 1.2s→6s. Null Field redesigned (regen-block only, no shield wipe; fires at combat start + every 8s). Phase Drive redesigned (6s cycle → 1s dodge window at 50% per hit). Siege Battery reduced to +10% hull damage only. Repair Swarm corrected to 0.5 HP/tick. Chrono Capacitor corrected to 3s duration. Previous v2.1 — Combat duration rebalance: all weapon damage significantly reduced (Laser 12→3, Railgun 32→8, Missile 20→5), Shield Projector regen reduced (1→0.33/tick), base hull increased (100→150 HP). Target fight duration is now 5–15 seconds. Previous v2.0 — Faction passives removed: all factions now start on equal stat footing; faction identity comes from their starting Artifact only. Balance changes: Railgun damage 28→32, Missile Pod cooldown 18→20 ticks, Shield Projector regen 2→1 per tick, Point-Defense intercept 65%→50%. Sell price bonus (Trader crew ×1.20) is the only sell multiplier remaining. Previous: v1.9 — Energy system: Base energy regeneration reduced from 5/tick to 1/tick. Generators are now meaningful — running 2+ weapons without a Reactor will cause weapons to stall waiting for energy. Combat tick system documented in full (50 ticks/s, 1500 tick max). Previous: v1.8 — Module ownership system: Modules are now purchased at stations (MODULES tab) and owned individually. Shipyard palette shows only modules you own, not all modules in the game. Each station offers 3 randomly assigned standard modules (seeded, balanced distribution across the galaxy). Vaesh home station (Dustfall) additionally offers the 2 Vaesh-exclusive modules. Sell owned (unequipped) modules for 50% buy price at any station. Starter build modules are pre-owned (in the grid from the start); removing them sends them to inventory. Grid drag-and-drop now supports within-grid swaps. Previous: v1.7 — Jump Range rework: Range stat controls jumps per turn (default 1). Ion Engine +1 Jump Range, Fuel Tank +2 Jump Range. Evasion flat 10% (no zone bonus). Zone effects and adjacency bonuses corrected. Shipyard UI: tap-for-info, drag-to-place, zone ? buttons, turn lock.*

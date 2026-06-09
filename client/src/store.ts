@@ -34,6 +34,9 @@ import {
   doCripple,
   checkWin,
   doEndTurn,
+  canEmergencySignal,
+  doEmergencySignal,
+  isStranded,
   FACTION_HOME_SYSTEM,
   deriveStats,
   generateGalaxy,
@@ -165,6 +168,7 @@ type GameStore = {
   // Turn
   jump: (targetSystemId: number) => void;
   endTurn: () => void;
+  emergencySignal: () => void;
 
   // Station
   openStation: () => void;
@@ -464,6 +468,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return;
     }
     const next = doEndTurn(matchState);
+    set({ matchState: next, jumpsUsed: 0, hasActed: false });
+  },
+
+  emergencySignal: () => {
+    const { matchState, myPlayerId, connectionMode, colyseusRoom } = get();
+    if (!matchState) return;
+    if (connectionMode === 'online' && colyseusRoom) {
+      colyseusRoom.send('EMERGENCY_SIGNAL', {});
+      return;
+    }
+    const r = canEmergencySignal(matchState, myPlayerId);
+    if (!r.ok) return;
+    const next = doEndTurn(doEmergencySignal(matchState, myPlayerId));
     set({ matchState: next, jumpsUsed: 0, hasActed: false });
   },
 

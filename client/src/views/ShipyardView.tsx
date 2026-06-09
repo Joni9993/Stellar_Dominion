@@ -29,6 +29,7 @@ const PART_COLORS: Record<string, string> = {
   cap:      'var(--amber)',
   engine:   'var(--green)',
   util:     'var(--dim)',
+  cargo:    'var(--dim)',
   artifact: 'var(--purple)',
 };
 

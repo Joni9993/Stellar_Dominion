@@ -621,6 +621,37 @@ export function doCripple(state: MatchState, playerId: string): MatchState {
   };
 }
 
+// ── Emergency Signal ──────────────────────────────────────────────────────────
+
+export const EMERGENCY_FUEL = 40;
+
+export function isStranded(state: MatchState, playerId: string): boolean {
+  const player = state.players.find((p) => p.id === playerId);
+  if (!player) return false;
+  const neighbors = getAdjacentSystems(state.galaxy, player.systemId);
+  return neighbors.every(
+    (neighborId) => getEffectiveJumpCost(player, state.galaxy, neighborId) > player.fuel,
+  );
+}
+
+export function canEmergencySignal(state: MatchState, playerId: string): ActionResult {
+  const player = state.players.find((p) => p.id === playerId);
+  if (!player) return { ok: false, reason: 'Player not found' };
+  if (!isStranded(state, playerId)) return { ok: false, reason: 'You still have enough fuel to jump' };
+  return { ok: true };
+}
+
+export function doEmergencySignal(state: MatchState, playerId: string): MatchState {
+  const player = state.players.find((p) => p.id === playerId)!;
+  const homeSystemId = FACTION_HOME_SYSTEM[player.factionId] ?? player.systemId;
+  return {
+    ...state,
+    players: state.players.map((p) =>
+      p.id !== playerId ? p : { ...p, systemId: homeSystemId, fuel: EMERGENCY_FUEL },
+    ),
+  };
+}
+
 // ── Match setup ───────────────────────────────────────────────────────────────
 
 export type PlayerSetup = { id: string; name: string; factionId: FactionId };

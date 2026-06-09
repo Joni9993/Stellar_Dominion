@@ -47,11 +47,14 @@ const DEF_STATS: Record<string, {
 };
 
 const GEN_STATS: Record<string, { energyPerTick: number; energyMax: number }> = {
-  'reactor':             { energyPerTick: 8,  energyMax: 20 },
-  'capacitor':           { energyPerTick: 4,  energyMax: 40 },
-  'advanced-reactor':    { energyPerTick: 14, energyMax: 30 },
-  'advanced-capacitor':  { energyPerTick: 6,  energyMax: 80 },
+  'reactor':             { energyPerTick: 8,  energyMax: 40 },
+  'capacitor':           { energyPerTick: 4,  energyMax: 20 },
+  'advanced-reactor':    { energyPerTick: 14, energyMax: 50 },
+  'advanced-capacitor':  { energyPerTick: 6,  energyMax: 60 },
 };
+
+const GEN_IDS = new Set(['reactor', 'advanced-reactor']);
+const CAP_IDS = new Set(['capacitor', 'advanced-capacitor']);
 
 const ENGINE_EVASION = 0.10; // per ion-engine
 
@@ -148,12 +151,21 @@ function buildSide(build: ShipBuild, mods: SideMods = {}): SideState {
     if (!id) continue;
     if (DEF_STATS[id]) {
       const d = DEF_STATS[id];
-      hull         += d.hull         ?? 0;
-      maxShield    += d.shieldPool   ?? 0;
-      shieldRegen  += d.shieldRegen  ?? 0;
-      armor        += d.armor        ?? 0;
+      hull         += d.hull  ?? 0;
+      maxShield    += d.shieldPool ?? 0;
+      armor        += d.armor ?? 0;
       pointDefChance = Math.min(1, pointDefChance + (d.pointDefChance ?? 0));
       if (id === 'armor-plate') hasArmor = true;
+      // Shield-projector regen: +0.5/tick when adjacent to any Reactor or Capacitor
+      if (id === 'shield-projector') {
+        const hasGenAdj = getNeighborIndices(i).some(j => {
+          const nid = grid[j];
+          return nid !== null && GEN_STATS[nid] !== undefined;
+        });
+        shieldRegen += hasGenAdj ? 0.5 : (1 / 3);
+      } else {
+        shieldRegen += d.shieldRegen ?? 0;
+      }
     }
     if (GEN_STATS[id]) {
       energyPerTick += GEN_STATS[id].energyPerTick;
@@ -174,12 +186,17 @@ function buildSide(build: ShipBuild, mods: SideMods = {}): SideState {
     const ws = WEAPON_STATS[id];
     const part = PARTS[id];
 
-    // Adjacency: generator/capacitor next to weapon → −15% cooldown
-    const hasGenAdj = getNeighborIndices(i).some(j => {
+    // Adjacency: type-specific bonus → −15% cooldown on the weapon only
+    // pulse-laser: Reactor/Advanced Reactor | railgun: Capacitor/Advanced Capacitor | missile-pod: Cargo Bay
+    const hasAdjBonus = getNeighborIndices(i).some(j => {
       const nid = grid[j];
-      return nid !== null && GEN_STATS[nid] !== undefined;
+      if (!nid) return false;
+      if (id === 'pulse-laser')  return GEN_IDS.has(nid);
+      if (id === 'railgun')      return CAP_IDS.has(nid);
+      if (id === 'missile-pod')  return nid === 'cargo-bay';
+      return false;
     });
-    const adjCooldown = hasGenAdj ? Math.round(ws.cooldown * 0.85) : ws.cooldown;
+    const adjCooldown = hasAdjBonus ? Math.round(ws.cooldown * 0.85) : ws.cooldown;
 
     // BOW zone: +10% accuracy
     const zoneAcc = i < 3 ? Math.min(0.97, ws.accuracy * 1.10) : ws.accuracy;

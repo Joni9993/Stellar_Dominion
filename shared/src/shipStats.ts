@@ -79,7 +79,8 @@ export function deriveStats(build: ShipBuild, parts: Record<string, Part>, facti
   // Gilded Aegis provides a virtual 30-point shield pool even without a Shield Projector
   if (hasGildedAegis && shieldMax === 0) shieldMax = 30;
 
-  // Pass 2: adjacency-dependent fire rate
+  // Pass 2: adjacency-dependent fire rate (type-specific — only the weapon gets the bonus and glows)
+  // pulse-laser: Reactor (gen) | railgun: Capacitor (cap) | missile-pod: Cargo Bay (cargo)
   for (let i = 0; i < 9; i++) {
     const id = grid[i];
     if (!id) continue;
@@ -91,29 +92,21 @@ export function deriveStats(build: ShipBuild, parts: Record<string, Part>, facti
     // Bow zone: +10%
     if (indexToZone(i) === 'bow') fr *= 1.1;
 
-    // Gen or cap adjacent to weapon: +15%
-    const hasGenAdj = getNeighborIndices(i).some(j => {
+    const hasAdj = getNeighborIndices(i).some(j => {
       const nid = grid[j];
       if (!nid) return false;
-      return parts[nid]?.type === 'gen' || parts[nid]?.type === 'cap';
+      const nt = parts[nid]?.type;
+      if (id === 'pulse-laser')  return nt === 'gen';
+      if (id === 'railgun')      return nt === 'cap';
+      if (id === 'missile-pod')  return nt === 'cargo';
+      return false;
     });
-    if (hasGenAdj) {
+    if (hasAdj) {
       fr *= 1.15;
       adjacencyBonus[i] = true;
     }
 
     fireRate += fr;
-  }
-
-  // Mark gen/cap cells adjacent to weapons
-  for (let i = 0; i < 9; i++) {
-    const id = grid[i];
-    if (!id) continue;
-    const p = parts[id];
-    if (!p || (p.type !== 'gen' && p.type !== 'cap')) continue;
-    if (getNeighborIndices(i).some(j => grid[j] && parts[grid[j]!]?.type === 'weapon')) {
-      adjacencyBonus[i] = true;
-    }
   }
 
   return {

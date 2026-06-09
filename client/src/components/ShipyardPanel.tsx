@@ -20,6 +20,7 @@ const PART_COLORS: Record<string, string> = {
   cap:      'var(--amber)',
   engine:   'var(--green)',
   util:     'var(--dim)',
+  cargo:    'var(--dim)',
   artifact: 'var(--purple)',
 };
 
@@ -41,12 +42,12 @@ const WEAPON_COMBAT_STATS: Record<string, { damage: number; accuracy: number; co
 };
 
 const PART_COMBAT_NOTES: Record<string, string> = {
-  'armor-plate':        '+6 armor reduces incoming physical hits',
+  'pulse-laser':        'Next to a Reactor → −15% cooldown (fires faster)',
+  'railgun':            'Next to a Capacitor → −15% cooldown (fires faster)',
+  'missile-pod':        'Next to a Cargo Bay → −15% cooldown (more ammo space)',
+  'armor-plate':        '+6 armor reduces all incoming hull damage per hit',
   'point-defense':      '50% chance to intercept incoming Missiles',
-  'reactor':            'Adjacent to a weapon → +15% fire rate for both',
-  'capacitor':          'Adjacent to a weapon → +15% fire rate for both',
-  'advanced-reactor':   'Adjacent to a weapon → +15% fire rate for both',
-  'advanced-capacitor': 'Adjacent to a weapon → +15% fire rate for both',
+  'shield-projector':   'Next to a Reactor or Capacitor → shield regen 0.33 → 0.5/tick',
 };
 
 const RPS_INFO: Record<string, { strong?: string[]; weak?: string[] }> = {
@@ -60,7 +61,7 @@ const RPS_INFO: Record<string, { strong?: string[]; weak?: string[] }> = {
 
 const ZONE_INFO: Record<string, { effect: string; bestFor: string }> = {
   BOW:  { effect: 'Weapons placed here gain +10% fire rate and +10% accuracy in combat.', bestFor: 'Weapons (Pulse Laser, Railgun, Missile Pod)' },
-  CORE: { effect: 'No direct zone bonus — but this is the adjacency hub. A Reactor or Capacitor placed next to a weapon grants +15% fire rate to both modules.', bestFor: 'Energy modules (Reactor, Capacitor)' },
+  CORE: { effect: 'No direct zone bonus — but ideal for adjacency combos. A Reactor next to a Pulse Laser grants it −15% cooldown. A Capacitor next to a Railgun does the same. Only the weapon benefits and glows. Shield Projectors next to any Reactor or Capacitor also gain +0.17 extra shield regen per tick.', bestFor: 'Energy modules (Reactor, Capacitor) and Shield Projector' },
   STERN:{ effect: 'No direct combat bonus. Recommended zone for mobility and utility modules by convention.', bestFor: 'Mobility modules (Ion Engine, Fuel Tank, Cargo Bay)' },
 };
 
