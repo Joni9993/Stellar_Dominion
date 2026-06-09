@@ -121,6 +121,18 @@ export class StarMap {
     this.redraw();
   }
 
+  /** Freeze/unfreeze rendering — use during combat to suppress WebGL output. */
+  setVisible(visible: boolean) {
+    this.app.stage.visible = visible;
+    if (visible) {
+      this.app.ticker.start();
+    } else {
+      this.app.ticker.stop();
+      // Clear to background so the GPU layer shows solid black, not a stale frame
+      (this.app.renderer as PIXI.Renderer).clear();
+    }
+  }
+
   destroy() {
     this.app.destroy(false);
   }

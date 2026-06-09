@@ -113,6 +113,13 @@ export function ObserverView() {
   // Local system selection — doesn't pollute the global player store
   const [selectedSystem, setSelectedSystem] = useState<number | null>(null);
 
+  const inCombat = activeView === 'fight';
+
+  // Freeze PixiJS rendering during combat — WebGL punches through CSS visibility
+  useEffect(() => {
+    starMapRef.current?.setVisible(!inCombat);
+  }, [inCombat]);
+
   // Init PixiJS once per game
   useEffect(() => {
     if (!canvasRef.current || !matchState) return;
@@ -169,12 +176,10 @@ export function ObserverView() {
   const activePlayer  = matchState.players.find((p) => p.id === matchState.activePlayerId);
   const activeFaction = activePlayer ? FACTIONS[activePlayer.factionId] : null;
 
-  const inCombat = activeView === 'fight';
-
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#0c1018' }}>
-      {/* ── Star map — hidden during combat ── */}
-      <div style={{ display: inCombat ? 'none' : 'block', position: 'absolute', inset: 0 }}>
+      {/* ── Star map — always mounted so PixiJS stays alive; frozen via setVisible ── */}
+      <div style={{ position: 'absolute', inset: 0, visibility: inCombat ? 'hidden' : 'visible' }}>
         <div className="map-canvas-wrap" style={{ position: 'absolute', inset: 0 }}>
           <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />
 
@@ -214,9 +219,9 @@ export function ObserverView() {
         )}
       </div>
 
-      {/* ── Combat — full screen, no map behind it ── */}
+      {/* ── Combat — position:fixed + zIndex:1000 overrides WebGL compositing ── */}
       {inCombat && (
-        <div style={{ position: 'absolute', inset: 0 }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: '#0c1018' }}>
           <CombatView />
         </div>
       )}
