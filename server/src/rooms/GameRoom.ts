@@ -148,7 +148,7 @@ export class GameRoom extends Room {
   async onLeave(client: Client, consented: boolean) {
     if (this.gamePhase === 'playing' && !consented) {
       try {
-        await this.allowReconnection(client, 60);
+        await this.allowReconnection(client, 600);
         // Reconnected via Colyseus token within the 60 s window — resend state
         const playerId = this.sessionToPlayer.get(client.sessionId);
         if (playerId && this.matchState) {

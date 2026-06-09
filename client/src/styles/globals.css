@@ -1530,6 +1530,50 @@ body {
 .target-name { font-size: 16px; flex: 1; }
 .target-arts { font-family: 'VT323'; font-size: 15px; flex-shrink: 0; }
 
+/* ── Settings modal ──────────────────────────────────────────────────────── */
+.settings-modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  width: min(260px, 88vw);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.settings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--teal);
+  letter-spacing: 1px;
+}
+
+.settings-modal-body {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-leave-btn {
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  cursor: pointer;
+  text-align: left;
+  letter-spacing: 0.5px;
+  transition: background 0.1s;
+}
+.settings-leave-btn:hover { background: rgba(232, 81, 46, 0.12); }
+
 /* ── Win overlay ─────────────────────────────────────────────────────────── */
 .win-overlay {
   position: fixed;

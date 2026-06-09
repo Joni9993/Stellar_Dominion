@@ -79,6 +79,11 @@ function getStablePlayerId(): string {
   return id;
 }
 
+const ROOM_ID_KEY = 'stellar-dominion-room-id';
+function saveRoomId(id: string) { localStorage.setItem(ROOM_ID_KEY, id); }
+function clearRoomId() { localStorage.removeItem(ROOM_ID_KEY); }
+function getSavedRoomId(): string | null { return localStorage.getItem(ROOM_ID_KEY); }
+
 // ── Store type ────────────────────────────────────────────────────────────────
 
 type GameStore = {
@@ -119,8 +124,11 @@ type GameStore = {
   hasObserver: boolean;
 
   // Lobby / connection
+  isReconnecting: boolean;
   createOnlineRoom: (playerName: string) => Promise<void>;
   joinOnlineRoom: (roomId: string, playerName: string) => Promise<void>;
+  leaveGame: () => void;
+  attemptReconnect: () => Promise<void>;
   setFaction: (factionId: FactionId) => void;
   setObserver: () => void;
   startOnlineGame: () => void;
@@ -171,6 +179,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   lobbyState: null,
   isObserver: false,
   hasObserver: false,
+  isReconnecting: false,
 
   matchState: null,
   selectedSystemId: null,
@@ -194,8 +203,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const client = new ColyseusClient(SERVER_URL);
     const reconnectId = getStablePlayerId();
     const room = await client.create<unknown>('game', { playerName, reconnectId });
+    saveRoomId(room.id);
     attachRoomListeners(room, set, get);
-    // Use the stable UUID as myPlayerId — it is what the server stores in matchState
     set({ colyseusRoom: room, connectionMode: 'online', myPlayerId: reconnectId });
   },
 
@@ -203,8 +212,40 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const client = new ColyseusClient(SERVER_URL);
     const reconnectId = getStablePlayerId();
     const room = await client.joinById<unknown>(roomId, { playerName, reconnectId });
+    saveRoomId(room.id);
     attachRoomListeners(room, set, get);
     set({ colyseusRoom: room, connectionMode: 'online', myPlayerId: reconnectId });
+  },
+
+  leaveGame: () => {
+    clearRoomId(); // clear BEFORE leave() so onLeave doesn't trigger auto-reconnect
+    const { colyseusRoom } = get();
+    colyseusRoom?.leave();
+    set({ colyseusRoom: null, matchState: null, lobbyState: null, isReconnecting: false, isObserver: false });
+  },
+
+  attemptReconnect: async () => {
+    if (get().colyseusRoom) return;
+    const roomId = getSavedRoomId();
+    if (!roomId) return;
+    set({ isReconnecting: true });
+    const client = new ColyseusClient(SERVER_URL);
+    const reconnectId = getStablePlayerId();
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise<void>((r) => setTimeout(r, 4000));
+      if (get().colyseusRoom) return; // reconnected via another path
+      try {
+        const room = await client.joinById<unknown>(roomId, { reconnectId });
+        saveRoomId(room.id);
+        attachRoomListeners(room, set, get);
+        set({ colyseusRoom: room, connectionMode: 'online', myPlayerId: reconnectId, isReconnecting: false });
+        return;
+      } catch {
+        // try again
+      }
+    }
+    clearRoomId();
+    set({ isReconnecting: false });
   },
 
   setFaction: (factionId) => {
@@ -605,6 +646,9 @@ function attachRoomListeners(
 
   room.onLeave(() => {
     console.log('[Colyseus] Disconnected from room');
+    if (!getSavedRoomId()) return; // intentional leave — don't reconnect
+    set({ colyseusRoom: null, isReconnecting: true });
+    setTimeout(() => get().attemptReconnect(), 2000);
   });
 }
 
