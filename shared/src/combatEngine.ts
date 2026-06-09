@@ -30,7 +30,7 @@ const EVASION_CAP = 0.50;
 const WEAPON_STATS: Record<string, {
   damage: number; accuracy: number; energyCost: number; cooldown: number;
 }> = {
-  'pulse-laser': { damage: 3,  accuracy: 0.85, energyCost: 8,  cooldown: 14 },
+  'pulse-laser': { damage: 4,  accuracy: 0.85, energyCost: 8,  cooldown: 14 },
   'railgun':     { damage: 8,  accuracy: 0.72, energyCost: 20, cooldown: 22 },
   'missile-pod': { damage: 5,  accuracy: 0.90, energyCost: 12, cooldown: 20 },
 };
@@ -56,7 +56,7 @@ const GEN_STATS: Record<string, { energyPerTick: number; energyMax: number }> = 
 const ENGINE_EVASION = 0.10; // per ion-engine
 
 // ── RPS counter modifier ─────────────────────────────────────────────────────
-// vs shield: laser ×2.5, kinetic ×0.6
+// vs shield: laser ×2.0, kinetic ×0.6
 // vs armor (no shield): laser ×0.6, kinetic ×1.5
 // missile always hits hull (bypasses shield), no armor modifier
 
@@ -67,7 +67,7 @@ function counterMod(
 ): { mod: number; callout?: string } {
   if (dmgType === 'missile') return { mod: 1.0 };
   if (oppShield > 0) {
-    if (dmgType === 'laser')   return { mod: 2.5, callout: 'LASER ▸ BURNS SHIELD' };
+    if (dmgType === 'laser')   return { mod: 2.0, callout: 'LASER ▸ BURNS SHIELD' };
     if (dmgType === 'kinetic') return { mod: 0.6, callout: 'RAILGUN ▸ DEFLECTED BY SHIELD' };
   } else if (oppHasArmor) {
     if (dmgType === 'laser')   return { mod: 0.6, callout: 'ARMOR ▸ ABSORBS LASER' };

@@ -73,7 +73,7 @@ function findNearestStation(state: MatchState, fromId: number): number {
 
 // Rough DPS proxy per weapon type (damage × accuracy / cooldown × 50 ticks/s)
 const WEAPON_DPS: Record<string, number> = {
-  'pulse-laser':  3  * 0.85 / 14 * 50,  // ~9.1
+  'pulse-laser':  4  * 0.85 / 14 * 50,  // ~12.1
   'railgun':      8  * 0.72 / 22 * 50,  // ~13.1
   'missile-pod':  5  * 0.90 / 20 * 50,  // ~11.25
 };

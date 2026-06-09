@@ -322,7 +322,7 @@ Three weapon types, three defense types. Each weapon is strong against one defen
 
 | Weapon | Bonus damage | Penalty damage (×0.6) |
 |---|---|---|
-| **Laser** | vs Shield **×2.5** | vs Armor |
+| **Laser** | vs Shield **×2.0** | vs Armor |
 | **Railgun (Kinetic)** | vs Armor ×1.5 | vs Shield |
 | **Missile** | Bypasses shields entirely, full hull damage | Intercepted by Point-Defense |
 
@@ -333,7 +333,7 @@ Three weapon types, three defense types. Each weapon is strong against one defen
 
 | Weapon | Damage/hit | Accuracy | Cooldown | Energy Cost | Notes |
 |---|---|---|---|---|---|
-| **Pulse Laser** | 3 | 85% | 14 ticks | 8 | Fast, great vs shields |
+| **Pulse Laser** | 4 | 85% | 14 ticks | 8 | Fast, great vs shields |
 | **Railgun** | 8 | 72% | 22 ticks | 20 | Slow, devastating vs armor |
 | **Missile Pod** | 5 | 90% | 20 ticks | 12 | Bypasses shields; point-def can intercept |
 

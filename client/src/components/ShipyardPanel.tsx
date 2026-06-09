@@ -35,7 +35,7 @@ const STAT_LABELS: Record<string, string> = {
 };
 
 const WEAPON_COMBAT_STATS: Record<string, { damage: number; accuracy: number; cooldown: number }> = {
-  'pulse-laser': { damage: 3,  accuracy: 0.85, cooldown: 14 },
+  'pulse-laser': { damage: 4,  accuracy: 0.85, cooldown: 14 },
   'railgun':     { damage: 8,  accuracy: 0.72, cooldown: 22 },
   'missile-pod': { damage: 5,  accuracy: 0.90, cooldown: 20 },
 };
@@ -50,10 +50,10 @@ const PART_COMBAT_NOTES: Record<string, string> = {
 };
 
 const RPS_INFO: Record<string, { strong?: string[]; weak?: string[] }> = {
-  'pulse-laser':      { strong: ['×1.5 damage vs Shields'],               weak: ['×0.6 damage vs Armor'] },
+  'pulse-laser':      { strong: ['×2.0 damage vs Shields'],               weak: ['×0.6 damage vs Armor'] },
   'railgun':          { strong: ['×1.5 damage vs Armor'],                 weak: ['×0.6 damage vs Shields'] },
   'missile-pod':      { strong: ['bypasses Shields completely'],           weak: ['50% intercepted by Point-Defense'] },
-  'shield-projector': { strong: ['reduces Railgun/Kinetic damage (×0.6)'],weak: ['Laser deals ×1.5 damage through it'] },
+  'shield-projector': { strong: ['reduces Railgun/Kinetic damage (×0.6)'],weak: ['Laser deals ×2.0 damage through it'] },
   'armor-plate':      { strong: ['absorbs Laser damage (×0.6)'],          weak: ['Railgun/Kinetic deals ×1.5 damage'] },
   'point-defense':    { strong: ['intercepts 50% of incoming Missiles'],  weak: [] },
 };

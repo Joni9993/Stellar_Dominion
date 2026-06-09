@@ -314,7 +314,7 @@ function CombatMockup() {
         <Ship facing="right" label="YOU" color="var(--teal)" hullPct={62} shieldPct={50} />
         <div style={{ width: 76, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, flexShrink: 0, position: 'relative' }}>
           <AbsDot n={3} style={{ top: -8, left: '50%', transform: 'translateX(-50%)' }} />
-          <div style={{ fontSize: 8, color: 'var(--amber)', fontFamily: "'Press Start 2P'", textAlign: 'center', lineHeight: 1.6 }}>LASER<br />×2.5</div>
+          <div style={{ fontSize: 8, color: 'var(--amber)', fontFamily: "'Press Start 2P'", textAlign: 'center', lineHeight: 1.6 }}>LASER<br />×2.0</div>
           <div style={{ width: 52, height: 2, background: 'linear-gradient(90deg, var(--teal), transparent)' }} />
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             <Badge n={2} />
@@ -403,7 +403,7 @@ const STEPS: TourStep[] = [
     annotations: [
       { label: 'Ships', detail: 'Both ships fire automatically based on their loadout. Combat plays out in real time — your build determines the outcome.' },
       { label: 'HP Bars', detail: 'Hull HP is your life; Shields regenerate each tick and absorb hits first. Destroy the enemy\'s hull to win.' },
-      { label: 'RPS Counters', detail: 'Laser ×2.5 vs Shields · Railgun ×1.5 vs Armor · Missiles bypass Shields entirely. Inspect enemy builds before attacking and counter them.' },
+      { label: 'RPS Counters', detail: 'Laser ×2.0 vs Shields · Railgun ×1.5 vs Armor · Missiles bypass Shields entirely. Inspect enemy builds before attacking and counter them.' },
     ],
   },
 ];
