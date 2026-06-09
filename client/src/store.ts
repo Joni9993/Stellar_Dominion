@@ -98,6 +98,7 @@ export interface GameSummary {
 }
 function saveGameSummary(s: GameSummary) { localStorage.setItem(GAME_SUMMARY_KEY, JSON.stringify(s)); }
 function clearGameSummary() { localStorage.removeItem(GAME_SUMMARY_KEY); }
+export function clearSavedGame() { clearGameSummary(); clearRoomId(); }
 export function getSavedGameSummary(): GameSummary | null {
   const raw = localStorage.getItem(GAME_SUMMARY_KEY);
   if (!raw) return null;
@@ -472,13 +473,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   emergencySignal: () => {
-    const { matchState, myPlayerId, connectionMode, colyseusRoom } = get();
+    const { matchState, myPlayerId, jumpsUsed, connectionMode, colyseusRoom } = get();
     if (!matchState) return;
     if (connectionMode === 'online' && colyseusRoom) {
       colyseusRoom.send('EMERGENCY_SIGNAL', {});
       return;
     }
-    const r = canEmergencySignal(matchState, myPlayerId);
+    const r = canEmergencySignal(matchState, myPlayerId, jumpsUsed);
     if (!r.ok) return;
     const next = doEndTurn(doEmergencySignal(matchState, myPlayerId));
     set({ matchState: next, jumpsUsed: 0, hasActed: false });

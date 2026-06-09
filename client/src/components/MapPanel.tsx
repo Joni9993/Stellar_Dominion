@@ -179,8 +179,9 @@ export function MapPanel() {
         {isMySystem && stranded && (
           <button
             className="btn danger"
-            onClick={emergencySignal}
-            title="Teleport to home system · Fuel restored to 40 · Turn ends"
+            disabled={jumpsUsed > 0}
+            title={jumpsUsed > 0 ? 'Already jumped this turn — available next turn' : 'Teleport to home system · Fuel restored to 40 · Turn ends'}
+            onClick={jumpsUsed === 0 ? emergencySignal : undefined}
           >
             ⚠ EMERGENCY SIGNAL
           </button>

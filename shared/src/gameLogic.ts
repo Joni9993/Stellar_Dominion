@@ -634,7 +634,8 @@ export function isStranded(state: MatchState, playerId: string): boolean {
   );
 }
 
-export function canEmergencySignal(state: MatchState, playerId: string): ActionResult {
+export function canEmergencySignal(state: MatchState, playerId: string, jumpsUsed: number): ActionResult {
+  if (jumpsUsed > 0) return { ok: false, reason: 'Already jumped this turn — Emergency Signal available next turn' };
   const player = state.players.find((p) => p.id === playerId);
   if (!player) return { ok: false, reason: 'Player not found' };
   if (!isStranded(state, playerId)) return { ok: false, reason: 'You still have enough fuel to jump' };

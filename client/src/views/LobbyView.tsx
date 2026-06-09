@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useGameStore, getSavedGameSummary, type GameSummary } from '../store';
+import { useGameStore, getSavedGameSummary, clearSavedGame, type GameSummary } from '../store';
 import { FACTIONS, FACTION_IDS } from '@stellar-dominion/shared';
 import type { FactionId } from '@stellar-dominion/shared';
 import { TourOverlay } from '../components/TourOverlay';
@@ -79,6 +79,7 @@ export function LobbyView() {
                 summary={savedGame}
                 loading={isReconnecting}
                 onResume={() => attemptReconnect()}
+                onDismiss={() => { clearSavedGame(); setSavedGame(null); }}
               />
             )}
 
@@ -269,14 +270,17 @@ export function LobbyView() {
 
 // ── Resume Game Card ──────────────────────────────────────────────────────────
 
-function ResumeCard({ summary, loading, onResume }: { summary: GameSummary; loading: boolean; onResume: () => void }) {
+function ResumeCard({ summary, loading, onResume, onDismiss }: { summary: GameSummary; loading: boolean; onResume: () => void; onDismiss: () => void }) {
   const activePlayer = summary.players.find((p) => p.id === summary.activePlayerId);
   const isMyTurn = summary.activePlayerId === summary.myPlayerId;
   const factionColor = activePlayer ? (FACTIONS[activePlayer.factionId as FactionId]?.color ?? '#4ecdc4') : '#4ecdc4';
 
   return (
     <div className="resume-card">
-      <div className="resume-card-header">ACTIVE GAME</div>
+      <div className="resume-card-header">
+        ACTIVE GAME
+        <button className="resume-card-dismiss" onClick={onDismiss} title="Remove from list">🗑</button>
+      </div>
       <div className="resume-card-info">
         <span className="resume-card-cycle">CYC {summary.cycle}/{summary.maxCycles}</span>
         <span

@@ -5,30 +5,6 @@
 
 ---
 
-## GETTING INTO A GAME
-
-**Multiplayer only (2–6 players):**
-1. One player clicks **HOST MULTIPLAYER** — a Room Code is shown.
-2. Other players click **JOIN GAME** and enter the Room Code.
-3. Every player picks a **Faction** (each faction is unique; one per room).
-4. The host clicks **▶ START GAME** once everyone has picked.
-5. If a player disconnects mid-game, they have **60 seconds to reconnect** before they are removed.
-
-**Joining as Observer:**
-- Any device can join a lobby and click **◉ JOIN AS OBSERVER** instead of picking a faction.
-- The observer does not play — they have no faction, no turn, and no actions.
-- Observers appear in the lobby list with a **◉ OBSERVER** badge.
-- Multiple observers per room are allowed.
-- The observer screen shows:
-  - A full-screen live galaxy map with all commanders visible.
-  - A **yellow rumor banner** (top-center) whenever an Artifact is rumored to appear in a system.
-  - An **active commander indicator** (bottom-center) showing who is currently taking their turn.
-  - **All combat** automatically — when any two commanders fight, the battle plays on the observer screen automatically. Player screens skip the combat animation when an observer is present.
-  - The **win screen** at the end of the game.
-- The observer screen is designed to be placed on a shared table display so all players can watch the map and battles without looking at their own devices.
-
----
-
 ## THE GALAXY AT A GLANCE
 
 Stellar Dominion is a turn-based multiplayer strategy game for **2–6 commanders**. Each player controls the flagship of an alien faction and travels through a galaxy of **18 star systems**. You earn credits through trade, spend them on ship parts and fuel, and hunt down powerful **Artifacts**. The first commander to collect enough Artifacts wins — or, if 20 cycles pass, whoever holds the most.
@@ -425,6 +401,30 @@ These six neutral Artifacts cycle through the game one at a time as the Rumored 
 | **Vampire Array** | On each hit | Restores 15% of total damage dealt (shield + hull combined) as your own hull HP. |
 
 Idryn Concord with **Concord Prism** amplifies all of the above by ×1.25 — this is why Idryn wants to collect as many Artifacts as possible.
+
+---
+
+## GETTING INTO A GAME
+
+**Multiplayer only (2–6 players):**
+1. One player clicks **HOST MULTIPLAYER** — a Room Code is shown.
+2. Other players click **JOIN GAME** and enter the Room Code.
+3. Every player picks a **Faction** (each faction is unique; one per room).
+4. The host clicks **▶ START GAME** once everyone has picked.
+5. If a player disconnects mid-game, they have **60 seconds to reconnect** before they are removed.
+
+**Joining as Observer:**
+- Any device can join a lobby and click **◉ JOIN AS OBSERVER** instead of picking a faction.
+- The observer does not play — they have no faction, no turn, and no actions.
+- Observers appear in the lobby list with a **◉ OBSERVER** badge.
+- Multiple observers per room are allowed.
+- The observer screen shows:
+  - A full-screen live galaxy map with all commanders visible.
+  - A **yellow rumor banner** (top-center) whenever an Artifact is rumored to appear in a system.
+  - An **active commander indicator** (bottom-center) showing who is currently taking their turn.
+  - **All combat** automatically — when any two commanders fight, the battle plays on the observer screen automatically. Player screens skip the combat animation when an observer is present.
+  - The **win screen** at the end of the game.
+- The observer screen is designed to be placed on a shared table display so all players can watch the map and battles without looking at their own devices.
 
 ---
 

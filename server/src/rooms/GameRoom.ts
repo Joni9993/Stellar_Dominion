@@ -451,7 +451,7 @@ export class GameRoom extends Room {
       }
 
       case 'EMERGENCY_SIGNAL': {
-        const r = canEmergencySignal(state, playerId);
+        const r = canEmergencySignal(state, playerId, flags.jumpsUsed);
         if (!r.ok) { client.send('ERROR', { message: r.reason }); return; }
         this.matchState = doEmergencySignal(state, playerId);
         this.matchState = doEndTurn(this.matchState);
