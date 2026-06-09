@@ -408,6 +408,40 @@ body {
   50% { box-shadow: 0 0 4px rgba(217, 164, 65, 0.3); }
 }
 
+/* ── Observer system info panel ─────────────────────────────────────────── */
+.observer-sys-panel {
+  position: absolute;
+  bottom: 60px;
+  left: 16px;
+  width: 280px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--panel2);
+  border: 1px solid var(--amber);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+}
+
+.observer-sys-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px 8px;
+  font-family: 'Press Start 2P';
+  font-size: 9px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel3);
+}
+
+.observer-sys-body {
+  padding: 10px 14px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 /* ── Observer active player indicator ───────────────────────────────────── */
 .observer-active-player {
   position: absolute;
@@ -1550,6 +1584,8 @@ body {
 
 .lobby-card {
   width: 420px;
+  max-height: 92vh;
+  overflow-y: auto;
   background: var(--panel2);
   border: 1px solid var(--line);
   padding: 36px 32px;

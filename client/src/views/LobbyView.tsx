@@ -180,7 +180,16 @@ export function LobbyView() {
           {/* Faction picker or observer status for me */}
           {me && !iAmObserver && (
             <div className="lobby-faction-picker">
-              <div className="lobby-label">CHOOSE YOUR FACTION</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                <div className="lobby-label" style={{ margin: 0 }}>CHOOSE YOUR FACTION</div>
+                <button
+                  className="btn ghost small"
+                  style={{ fontSize: 10, letterSpacing: 0.5, whiteSpace: 'nowrap' }}
+                  onClick={setObserver}
+                >
+                  ◉ OBSERVER MODE
+                </button>
+              </div>
               <div className="lobby-faction-grid">
                 {FACTION_IDS.map((id) => {
                   const taken = lobbyState.players.some((p) => p.factionId === id && p.id !== myPlayerId);
@@ -199,23 +208,20 @@ export function LobbyView() {
                   );
                 })}
               </div>
-              <button
-                className="btn ghost"
-                style={{ marginTop: 10, fontSize: 11, opacity: 0.7 }}
-                onClick={setObserver}
-              >
-                ◉ JOIN AS OBSERVER
-              </button>
             </div>
           )}
 
           {me && iAmObserver && (
-            <div className="lobby-faction-picker">
-              <div style={{ fontFamily: "'Press Start 2P'", fontSize: 8, color: 'var(--dim)', textAlign: 'center', padding: '16px 0' }}>
-                ◉ OBSERVING — NO FACTION<br />
-                <span style={{ fontSize: 7, color: 'var(--faint)', marginTop: 8, display: 'block' }}>
-                  you will see the map and all battles
-                </span>
+            <div style={{
+              background: 'var(--panel3)', border: '1px dashed var(--dim)',
+              padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12,
+            }}>
+              <span style={{ color: 'var(--dim)', fontSize: 18 }}>◉</span>
+              <div>
+                <div style={{ fontFamily: "'Press Start 2P'", fontSize: 8, color: 'var(--dim)' }}>OBSERVER MODE</div>
+                <div style={{ fontSize: 12, color: 'var(--faint)', marginTop: 4 }}>
+                  No faction — you will see the full map and all battles
+                </div>
               </div>
             </div>
           )}
