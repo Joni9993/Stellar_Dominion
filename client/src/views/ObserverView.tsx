@@ -4,6 +4,8 @@ import { StarMap } from '../pixi/StarMap';
 import { ARTIFACTS, CREW, FACTIONS, PARTS } from '@stellar-dominion/shared';
 import { CombatView } from './CombatView';
 import { WinOverlay } from '../components/WinOverlay';
+import { RulesModal } from '../components/RulesModal';
+import { SettingsModal } from '../components/SettingsModal';
 
 // ── Read-only system info panel ───────────────────────────────────────────────
 
@@ -112,6 +114,8 @@ export function ObserverView() {
 
   // Local system selection — doesn't pollute the global player store
   const [selectedSystem, setSelectedSystem] = useState<number | null>(null);
+  const [rulesOpen, setRulesOpen]       = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const inCombat = activeView === 'fight';
 
@@ -208,6 +212,12 @@ export function ObserverView() {
               ► {activePlayer.name} COMMANDING
             </div>
           )}
+
+          {/* Bottom-right utility buttons */}
+          <div className="observer-util-btns">
+            <button className="hud-rules-btn" title="Rules of the Galaxy" onClick={() => setRulesOpen(true)}>?</button>
+            <button className="hud-rules-btn" title="Settings / Leave" onClick={() => setSettingsOpen(true)}>⚙</button>
+          </div>
         </div>
 
         {/* System info panel */}
@@ -227,6 +237,9 @@ export function ObserverView() {
       )}
 
       <WinOverlay />
+
+      {rulesOpen    && <RulesModal    onClose={() => setRulesOpen(false)} />}
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }

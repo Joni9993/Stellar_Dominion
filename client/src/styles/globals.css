@@ -457,6 +457,16 @@ body {
   white-space: nowrap;
 }
 
+/* ── Observer utility buttons (bottom-right corner) ─────────────────────── */
+.observer-util-btns {
+  position: absolute;
+  bottom: 20px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
 /* ── Observer combat wrapper — fullscreen CombatView on observer device ── */
 .observer-combat-wrap {
   position: fixed;
@@ -1186,6 +1196,28 @@ body {
 }
 .projectile--missile.projectile--A { animation: missile-A 0.92s cubic-bezier(0.3, 0, 0.6, 1) forwards; }
 .projectile--missile.projectile--B { animation: missile-B 0.92s cubic-bezier(0.3, 0, 0.6, 1) forwards; }
+
+/* ── Floating damage numbers ─────────────────────────────────────────────── */
+@keyframes float-up {
+  0%   { opacity: 1;   transform: translateY(0); }
+  65%  { opacity: 0.9; }
+  100% { opacity: 0;   transform: translateY(-46px); }
+}
+
+.float-dmg {
+  position: absolute;
+  font-family: 'Press Start 2P';
+  font-size: 10px;
+  font-weight: bold;
+  pointer-events: none;
+  animation: float-up 1.1s ease-out forwards;
+  white-space: nowrap;
+  text-shadow: 0 0 8px currentColor;
+  z-index: 10;
+}
+
+.float-dmg--A { left: 4%; }
+.float-dmg--B { right: 4%; }
 
 /* RPS callout banner */
 .combat-callout {

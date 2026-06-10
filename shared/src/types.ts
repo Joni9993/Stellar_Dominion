@@ -178,6 +178,7 @@ export type CombatEvent = {
   damageType?: DamageType;
   shieldDmg?: number;
   hullDmg?: number;
+  armorReduction?: number;
   healAmt?: number;
   callout?: string;       // RPS callout banner text
   artifactId?: string;

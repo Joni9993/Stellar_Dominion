@@ -30,6 +30,13 @@ const PROJ_COLOR: Record<DamageType, string> = {
   missile: 'var(--amber)',
 };
 
+// Floating damage number colors (laser=blue, kinetic/railgun=orange, missile=gray)
+const FLOAT_COLOR: Record<DamageType, string> = {
+  laser:   '#4a9eff',
+  kinetic: '#ff9500',
+  missile: '#aaaaaa',
+};
+
 // Projectile duration by type (ms)
 const PROJ_DURATION: Record<DamageType, number> = {
   laser:   750,
@@ -45,6 +52,14 @@ interface Projectile {
   durationMs: number;
   scatterY: number;  // px vertical offset from center (kinetic scatter)
   delayMs:  number;  // animation delay (kinetic stagger)
+}
+
+interface FloatNumber {
+  id: number;
+  targetSide: 'A' | 'B'; // which ship was hit
+  dmgType: DamageType;
+  amount: number;
+  yOffset: number; // px vertical spread to prevent stacking
 }
 
 let projIdSeq = 0;
@@ -70,12 +85,18 @@ interface CombatStats {
   shieldBlockedB: number;  // B's shield absorbed hits from A
   shieldRegenA: number;
   shieldRegenB: number;
+  interceptsA: number;    // missiles intercepted by A's point-defense
+  interceptsB: number;    // missiles intercepted by B's point-defense
+  armorReducedA: number;  // total hull damage reduced by A's armor plate
+  armorReducedB: number;  // total hull damage reduced by B's armor plate
 }
 
 function computeStats(timeline: CombatEvent[]): CombatStats {
   const dmgBySlotA: Record<number, number> = {};
   const dmgBySlotB: Record<number, number> = {};
   let shieldBlockedA = 0, shieldBlockedB = 0, shieldRegenA = 0, shieldRegenB = 0;
+  let interceptsA = 0, interceptsB = 0;
+  let armorReducedA = 0, armorReducedB = 0;
 
   for (const evt of timeline) {
     if (evt.type === 'hit') {
@@ -83,17 +104,23 @@ function computeStats(timeline: CombatEvent[]): CombatStats {
       if (evt.side === 'A') {
         dmgBySlotA[evt.slotIndex] = (dmgBySlotA[evt.slotIndex] ?? 0) + total;
         shieldBlockedB += evt.shieldDmg ?? 0;
+        armorReducedB  += evt.armorReduction ?? 0;
       } else {
         dmgBySlotB[evt.slotIndex] = (dmgBySlotB[evt.slotIndex] ?? 0) + total;
         shieldBlockedA += evt.shieldDmg ?? 0;
+        armorReducedA  += evt.armorReduction ?? 0;
       }
     }
     if (evt.type === 'regen') {
       if (evt.side === 'A') shieldRegenA += evt.healAmt ?? 0;
       else                   shieldRegenB += evt.healAmt ?? 0;
     }
+    if (evt.type === 'intercept') {
+      if (evt.side === 'A') interceptsA++;
+      else                   interceptsB++;
+    }
   }
-  return { dmgBySlotA, dmgBySlotB, shieldBlockedA, shieldBlockedB, shieldRegenA, shieldRegenB };
+  return { dmgBySlotA, dmgBySlotB, shieldBlockedA, shieldBlockedB, shieldRegenA, shieldRegenB, interceptsA, interceptsB, armorReducedA, armorReducedB };
 }
 
 // ── Battle report component ───────────────────────────────────────────────────
@@ -107,26 +134,30 @@ function BattleReport({ result, iAmAttacker, asObserver }: { result: CombatResul
     {
       key: 'mine',
       label: asObserver ? factionAName : 'YOUR SHIP',
-      factionId: iAmAttacker ? result.factionA : result.factionB,
-      build:    iAmAttacker ? result.buildA : result.buildB,
-      dmgBySlot: iAmAttacker ? stats.dmgBySlotA : stats.dmgBySlotB,
-      blocked:   iAmAttacker ? stats.shieldBlockedA : stats.shieldBlockedB,
-      regen:     iAmAttacker ? stats.shieldRegenA   : stats.shieldRegenB,
+      factionId:    iAmAttacker ? result.factionA : result.factionB,
+      build:        iAmAttacker ? result.buildA   : result.buildB,
+      dmgBySlot:    iAmAttacker ? stats.dmgBySlotA    : stats.dmgBySlotB,
+      blocked:      iAmAttacker ? stats.shieldBlockedA : stats.shieldBlockedB,
+      regen:        iAmAttacker ? stats.shieldRegenA   : stats.shieldRegenB,
+      intercepts:   iAmAttacker ? stats.interceptsA    : stats.interceptsB,
+      armorReduced: iAmAttacker ? stats.armorReducedA  : stats.armorReducedB,
     },
     {
       key: 'enemy',
       label: asObserver ? factionBName : 'ENEMY',
-      factionId: iAmAttacker ? result.factionB : result.factionA,
-      build:    iAmAttacker ? result.buildB : result.buildA,
-      dmgBySlot: iAmAttacker ? stats.dmgBySlotB : stats.dmgBySlotA,
-      blocked:   iAmAttacker ? stats.shieldBlockedB : stats.shieldBlockedA,
-      regen:     iAmAttacker ? stats.shieldRegenB   : stats.shieldRegenA,
+      factionId:    iAmAttacker ? result.factionB : result.factionA,
+      build:        iAmAttacker ? result.buildB   : result.buildA,
+      dmgBySlot:    iAmAttacker ? stats.dmgBySlotB    : stats.dmgBySlotA,
+      blocked:      iAmAttacker ? stats.shieldBlockedB : stats.shieldBlockedA,
+      regen:        iAmAttacker ? stats.shieldRegenB   : stats.shieldRegenA,
+      intercepts:   iAmAttacker ? stats.interceptsB    : stats.interceptsA,
+      armorReduced: iAmAttacker ? stats.armorReducedB  : stats.armorReducedA,
     },
   ];
 
   return (
     <div className="battle-report">
-      {sides.map(({ key, label, factionId, build, dmgBySlot, blocked, regen }) => {
+      {sides.map(({ key, label, factionId, build, dmgBySlot, blocked, regen, intercepts, armorReduced }) => {
         const faction = FACTIONS[factionId as FactionId];
         const weaponRows = Object.entries(dmgBySlot)
           .map(([idx, dmg]) => {
@@ -170,6 +201,18 @@ function BattleReport({ result, iAmAttacker, asObserver }: { result: CombatResul
               <div className="br-row">
                 <span className="br-label">SHD REGEN</span>
                 <span className="br-val" style={{ color: '#7fd0cc' }}>{regen}</span>
+              </div>
+            )}
+            {intercepts > 0 && (
+              <div className="br-row">
+                <span className="br-label">* PD BLOCKED</span>
+                <span className="br-val" style={{ color: 'var(--teal)' }}>{intercepts}×</span>
+              </div>
+            )}
+            {armorReduced > 0 && (
+              <div className="br-row">
+                <span className="br-label">ARMOR SAVED</span>
+                <span className="br-val" style={{ color: '#8a9a5b' }}>{armorReduced}</span>
               </div>
             )}
           </div>
@@ -270,6 +313,7 @@ export function CombatView() {
 
   const [pb, setPb] = useState<PlayState | null>(null);
   const [projectiles, setProjectiles] = useState<Projectile[]>([]);
+  const [floatNumbers, setFloatNumbers] = useState<FloatNumber[]>([]);
   const rafRef       = useRef<number | null>(null);
   const accRef       = useRef(0);
   const evtIdx       = useRef(0);
@@ -292,6 +336,7 @@ export function CombatView() {
     if (!combatResult) return;
     setPb(initPlayState(combatResult));
     setProjectiles([]);
+    setFloatNumbers([]);
     evtIdx.current = 0;
     accRef.current = 0;
   }, [combatResult]);
@@ -323,6 +368,24 @@ export function CombatView() {
       setProjectiles(ps => [...ps, proj]);
       setTimeout(() => setProjectiles(ps => ps.filter(p => p.id !== proj.id)), durationMs + 60);
     }
+  }
+
+  // ── Spawn floating damage number for a hit event ─────────────────────────
+
+  function spawnFloatNumber(evt: CombatEvent) {
+    if (!evt.damageType) return;
+    const total = (evt.shieldDmg ?? 0) + (evt.hullDmg ?? 0);
+    if (total <= 0) return;
+    const fnId = projIdSeq++;
+    const fn: FloatNumber = {
+      id: fnId,
+      targetSide: evt.side === 'A' ? 'B' : 'A',
+      dmgType: evt.damageType,
+      amount: total,
+      yOffset: (fnId % 5) * 12,
+    };
+    setFloatNumbers(prev => [...prev, fn]);
+    setTimeout(() => setFloatNumbers(prev => prev.filter(f => f.id !== fn.id)), 1150);
   }
 
   // ── Process one timeline event ────────────────────────────────────────────
@@ -368,6 +431,7 @@ export function CombatView() {
     });
 
     if (evt.type === 'weapon_fire') spawnProjectiles(evt, nowMs);
+    if (evt.type === 'hit') spawnFloatNumber(evt);
   }, []);
 
   // ── Animation loop ────────────────────────────────────────────────────────
@@ -507,6 +571,19 @@ export function CombatView() {
                 animationDelay: p.delayMs > 0 ? `${p.delayMs}ms` : undefined,
               } as React.CSSProperties}
             />
+          ))}
+
+          {floatNumbers.map(fn => (
+            <div
+              key={fn.id}
+              className={`float-dmg float-dmg--${visualSide(fn.targetSide)}`}
+              style={{
+                color: FLOAT_COLOR[fn.dmgType],
+                top: `calc(35% + ${fn.yOffset}px)`,
+              } as React.CSSProperties}
+            >
+              -{fn.amount}
+            </div>
           ))}
 
           {pb.callout && <div className="combat-callout">{pb.callout}</div>}

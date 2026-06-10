@@ -366,6 +366,7 @@ export function runCombat(
 
     let shieldDmg = 0;
     let hullDmg = 0;
+    let armorReduction = 0;
     let callout: string | undefined;
 
     if (!bypassShield && target.shield > 0 && target.shieldNullTicks <= 0) {
@@ -376,7 +377,9 @@ export function runCombat(
       shieldDmg = Math.min(target.shield, totalVsShield);
       target.shield -= shieldDmg;
       const overflow = totalVsShield - shieldDmg;
-      hullDmg = Math.max(0, Math.round(overflow * siegeMult) - target.armor); // Siege Battery on overflow to hull
+      const rawOverflowHull = Math.max(0, Math.round(overflow * siegeMult));
+      hullDmg = Math.max(0, rawOverflowHull - target.armor);
+      armorReduction = rawOverflowHull - hullDmg;
       target.hull -= hullDmg;
     } else {
       // Hits hull directly (Siege Battery applies here)
@@ -384,7 +387,9 @@ export function runCombat(
       if (!callout) callout = c;
       if (weapon.dmgType === 'missile' && shieldDmg === 0 && !callout) callout = 'MISSILE ▸ BREACHES HULL';
       if (bypassShield && weapon.dmgType !== 'missile' && !callout) callout = 'OVERCLOCK ▸ BYPASSES SHIELD';
-      hullDmg = Math.max(1, Math.round(rawDmg * mod * siegeMult) - target.armor);
+      const rawHullDirect = Math.round(rawDmg * mod * siegeMult);
+      hullDmg = Math.max(1, rawHullDirect - target.armor);
+      armorReduction = rawHullDirect - hullDmg;
       target.hull -= hullDmg;
     }
 
@@ -400,6 +405,7 @@ export function runCombat(
       tick, side: attackerSide, type: 'hit',
       slotIndex: weapon.slotIndex, damageType: weapon.dmgType,
       shieldDmg, hullDmg, callout,
+      ...(armorReduction > 0 ? { armorReduction } : {}),
     });
 
     return target.hull <= 0;
