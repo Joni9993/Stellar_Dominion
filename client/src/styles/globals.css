@@ -459,12 +459,12 @@ body {
 
 /* ── Observer utility buttons (bottom-right corner) ─────────────────────── */
 .observer-util-btns {
-  position: absolute;
+  position: fixed;
   bottom: 20px;
   right: 16px;
   display: flex;
   gap: 6px;
-  z-index: 10;
+  z-index: 1100;
 }
 
 /* ── Observer combat wrapper — fullscreen CombatView on observer device ── */

@@ -31,7 +31,7 @@ const WEAPON_STATS: Record<string, {
   damage: number; accuracy: number; energyCost: number; cooldown: number;
 }> = {
   'pulse-laser': { damage: 4,  accuracy: 0.85, energyCost: 8,  cooldown: 14 },
-  'railgun':     { damage: 8,  accuracy: 0.72, energyCost: 20, cooldown: 22 },
+  'railgun':     { damage: 7,  accuracy: 0.72, energyCost: 20, cooldown: 22 },
   'missile-pod': { damage: 5,  accuracy: 0.90, energyCost: 12, cooldown: 20 },
 };
 
@@ -42,7 +42,7 @@ const DEF_STATS: Record<string, {
   armor?: number; pointDefChance?: number;
 }> = {
   'shield-projector': { shieldPool: 60, shieldRegen: 1/3 },
-  'armor-plate':       { hull: 40, armor: 6 },
+  'armor-plate':       { hull: 40, armor: 2 },
   'point-defense':     { pointDefChance: 0.50 },
 };
 
@@ -114,6 +114,7 @@ interface SideState {
   phaseDriveCd: number;         // ticks until Phase Drive window opens
   phaseDriveWindowTicks: number; // ticks remaining in active dodge window
   shieldNullTicks: number;      // ticks left that shield regen is blocked
+  shieldBroken: boolean;        // shield was fully drained — regen disabled until Gilded Aegis restarts it
   overclockShots: number;       // Overclock Matrix shots remaining
   chronoActive: boolean;        // Chrono Capacitor burst phase
   wrathActive: boolean;         // Wrath Engine triggered
@@ -256,6 +257,7 @@ function buildSide(build: ShipBuild, mods: SideMods = {}): SideState {
     phaseDriveCd,
     phaseDriveWindowTicks: 0,
     shieldNullTicks: 0,
+    shieldBroken: false,
     overclockShots,
     chronoActive,
     wrathActive: false,
@@ -376,6 +378,7 @@ export function runCombat(
       const totalVsShield = Math.round(rawDmg * mod);
       shieldDmg = Math.min(target.shield, totalVsShield);
       target.shield -= shieldDmg;
+      if (target.shield === 0 && target.maxShield > 0) target.shieldBroken = true;
       const overflow = totalVsShield - shieldDmg;
       const rawOverflowHull = Math.max(0, Math.round(overflow * siegeMult));
       hullDmg = Math.max(0, rawOverflowHull - target.armor);
@@ -421,11 +424,11 @@ export function runCombat(
     ]) {
       st.energy = Math.min(st.maxEnergy, st.energy + st.energyPerTick);
 
-      // Shield regen (blocked by Null Field — shield HP is retained, only regen stops)
+      // Shield regen (blocked by Null Field or by shieldBroken — only Gilded Aegis can restart a broken shield)
       // Only apply regen cap when there is actual regen — otherwise Gilded Aegis shield persists
       if (st.shieldNullTicks > 0) {
         st.shieldNullTicks--;
-      } else if (st.shieldRegen > 0) {
+      } else if (st.shieldRegen > 0 && !st.shieldBroken) {
         st.shield = Math.min(st.maxShield, st.shield + st.shieldRegen);
       }
 
@@ -453,6 +456,7 @@ export function runCombat(
         const restore = Math.min(aegisCap, Math.max(0, effectiveCap - st.shield));
         if (restore > 0) {
           st.shield += restore;
+          st.shieldBroken = false; // Gilded Aegis restarts a broken shield — regen resumes
           const slotIdx = st.grid.findIndex(id => id === 'gilded-aegis');
           pushEvt({ tick, side, type: 'artifact_pulse', slotIndex: slotIdx >= 0 ? slotIdx : 4, artifactId: 'gilded-aegis', effectDesc: `SHIELD +${restore}` });
         }

@@ -212,12 +212,6 @@ export function ObserverView() {
               ► {activePlayer.name} COMMANDING
             </div>
           )}
-
-          {/* Bottom-right utility buttons */}
-          <div className="observer-util-btns">
-            <button className="hud-rules-btn" title="Rules of the Galaxy" onClick={() => setRulesOpen(true)}>?</button>
-            <button className="hud-rules-btn" title="Settings / Leave" onClick={() => setSettingsOpen(true)}>⚙</button>
-          </div>
         </div>
 
         {/* System info panel */}
@@ -235,6 +229,12 @@ export function ObserverView() {
           <CombatView />
         </div>
       )}
+
+      {/* Utility buttons — fixed above all layers including PixiJS canvas */}
+      <div className="observer-util-btns">
+        <button className="hud-rules-btn" title="Rules of the Galaxy" onClick={() => setRulesOpen(true)}>?</button>
+        <button className="hud-rules-btn" title="Settings / Leave" onClick={() => setSettingsOpen(true)}>⚙</button>
+      </div>
 
       <WinOverlay />
 

@@ -158,7 +158,7 @@ Each faction has a distinct **ship silhouette** (visible in the Shipyard and in 
 **Color:** Gold `#d9a441`
 **Strengths:** Trade-oriented playstyle — use credits from trading to claim Rumored Artifacts early and often.
 **Weaknesses:** No inherent combat stat advantage; the Gilded Aegis is your main defensive tool.
-**Starting Artifact — Gilded Aegis:** Every 6 seconds (300 ticks), restores up to 30 shield points. Works without a Shield Projector — the Aegis generates its own 30-point temporary shield pool. With a Shield Projector equipped, restores toward your normal cap instead.
+**Starting Artifact — Gilded Aegis:** Every 6 seconds (300 ticks), restores up to 30 shield points. Works without a Shield Projector — the Aegis generates its own 30-point temporary shield pool. With a Shield Projector equipped, restores toward your normal cap instead. **Unique:** The Aegis is the only way to restart a Shield Projector that was fully drained — after the pulse, the projector regenerates normally again.
 
 ---
 
@@ -281,7 +281,7 @@ Two crew slots sit at the **nose of the ship**, outside the 9-slot grid. You can
 ### Defenses
 | Module | Type | What it does | Best Zone |
 |---|---|---|---|
-| Shield Projector | Shield | Energy pool that regenerates between volleys | Core |
+| Shield Projector | Shield | Energy pool that regenerates between volleys — permanently disabled if fully depleted (only Gilded Aegis can restart it) | Core |
 | Armor Plate | Armor | Flat damage reduction on every hit | Core |
 | Point-Defense | Point-Defense | Intercepts and destroys incoming missiles | Bow/Core |
 
@@ -323,7 +323,7 @@ Three weapon types, three defense types. Each weapon is strong against one defen
 | Weapon | Damage/hit | Accuracy | Cooldown | Energy Cost | Notes |
 |---|---|---|---|---|---|
 | **Pulse Laser** | 4 | 85% | 14 ticks | 8 | Fast, great vs shields |
-| **Railgun** | 8 | 72% | 22 ticks | 20 | Slow, devastating vs armor |
+| **Railgun** | 7 | 72% | 22 ticks | 20 | Slow, devastating vs armor |
 | **Missile Pod** | 5 | 90% | 20 ticks | 12 | Bypasses shields; point-def can intercept |
 
 **Accuracy** is reduced by the enemy's **evasion** (Ion Engines and Far Sight grant evasion). Weapons placed in the **BOW zone** gain +10% accuracy.
@@ -341,7 +341,7 @@ The combat engine runs a **tick simulation** at 50 ticks per second (simulation 
 5. **Hit roll** — weapon accuracy × (1 − enemy evasion). If failed: miss, no damage.
 6. **Missile intercept check** — before a missile hits, Point-Defense gets its intercept roll (50% chance).
 7. **Phase Drive dodge** — if Phase Drive's dodge window is active (1s every 6s), each incoming attack has a 50% chance to be evaded entirely.
-8. **Damage applied** — shields absorb damage first; overflow carries to hull. Armor reduces all hull hits by a flat 6.
+8. **Damage applied** — shields absorb damage first; overflow carries to hull. Armor reduces all hull hits by a flat 2. **If the shield pool is fully drained to 0, the Shield Projector shuts down permanently** — no more regen for the rest of combat unless Gilded Aegis fires and restarts it.
 9. **First ship to 0 hull loses.** Time limit reached → higher hull% wins.
 
 ### Energy System
@@ -364,8 +364,8 @@ The Adjacency Bonus (Reactor/Capacitor next to a Weapon) also reduces that weapo
 
 | Part | Combat effect |
 |---|---|
-| Shield Projector | +60 shield pool, +0.33 shield/tick regen (→ 0.5/tick when adjacent to Reactor or Capacitor) |
-| Armor Plate | +40 hull, flat 6 damage reduction per hit |
+| Shield Projector | +60 shield pool, +0.33 shield/tick regen (→ 0.5/tick when adjacent to Reactor or Capacitor). **Once the shield reaches 0 it is permanently disabled** — regen stops and does not restart until Gilded Aegis fires. |
+| Armor Plate | +40 hull, flat 2 damage reduction per hit |
 | Point-Defense | 50% chance to intercept each incoming missile |
 | Reactor | +8 energy/tick, +40 energy maximum |
 | Capacitor | +4 energy/tick, +20 energy maximum |
@@ -375,7 +375,7 @@ The Adjacency Bonus (Reactor/Capacitor next to a Weapon) also reduces that weapo
 
 | Artifact | Owner | Trigger | Effect |
 |---|---|---|---|
-| Gilded Aegis | Vol'Kesh | Every 6s (300 ticks) | Restores up to 30 shield. Works without a Shield Projector (own 30-point pool); with one equipped, restores toward your normal cap. |
+| Gilded Aegis | Vol'Kesh | Every 6s (300 ticks) | Restores up to 30 shield. Works without a Shield Projector (own 30-point pool); with one equipped, restores toward your normal cap. **Also restarts a broken shield** — if the Shield Projector was disabled by being fully drained, the Aegis pulse re-enables it and regen resumes. |
 | Wrath Engine | Korthaar | Own hull drops below 50% | All weapon cooldowns permanently −33% (fire rate +50%). One-time, stays active. |
 | Concord Prism | Idryn | Passive | All other equipped artifacts +25% effectiveness (cooldowns shorter, durations longer, values higher) |
 | Far Sight | Nyxari | Combat start | All weapons fire at half cooldown on first shot (First Strike); +15% permanent evasion |
