@@ -5,3 +5,4 @@ node_modules
 **/dist
 simulation
 *.md
+!Rules of the Galaxy.md

@@ -3,6 +3,7 @@ RUN corepack enable
 WORKDIR /app
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json .npmrc tsconfig.base.json ./
+COPY ["Rules of the Galaxy.md", "./"]
 COPY shared ./shared
 COPY client ./client
 COPY server/package.json ./server/package.json
